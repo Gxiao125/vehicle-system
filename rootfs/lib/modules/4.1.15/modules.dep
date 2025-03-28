@@ -1,0 +1,11 @@
+8821cu.ko:
+usb_f_mass_storage.ko: libcomposite.ko
+8189fs.ko:
+usb_f_uac1.ko: libcomposite.ko
+libcomposite.ko:
+8192cu.ko:
+g_mass_storage.ko: usb_f_mass_storage.ko libcomposite.ko
+ft5x06.ko:
+8188eu.ko:
+gpioled.ko:
+g_audio.ko: libcomposite.ko
