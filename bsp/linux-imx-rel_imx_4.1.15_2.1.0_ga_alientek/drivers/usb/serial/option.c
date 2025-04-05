@@ -513,10 +513,6 @@ static void option_instat_callback(struct urb *urb);
 #define VIATELECOM_VENDOR_ID			0x15eb
 #define VIATELECOM_PRODUCT_CDS7			0x0001
 
-/* EC20 4G */
-#define QUECTEL_VENDOR_ID			0X2C7C
-#define QUECTEL_PRODUCT_EC20		0X0125
-
 struct option_blacklist_info {
 	/* bitmask of interface numbers blacklisted for send_setup */
 	const unsigned long sendsetup;
@@ -628,10 +624,6 @@ static const struct option_blacklist_info sierra_mc73xx_blacklist = {
 };
 
 static const struct usb_device_id option_ids[] = {
-	{ USB_DEVICE(0x19d2, 0x0117) }, /* ME3630*/
-	{ USB_DEVICE(0x19d2, 0x0199) }, 
-	{ USB_DEVICE(0x19d2, 0x1476) }, 
-	{ USB_DEVICE(QUECTEL_VENDOR_ID, QUECTEL_PRODUCT_EC20) }, /* EC20 4G */
 	{ USB_DEVICE(OPTION_VENDOR_ID, OPTION_PRODUCT_COLT) },
 	{ USB_DEVICE(OPTION_VENDOR_ID, OPTION_PRODUCT_RICOLA) },
 	{ USB_DEVICE(OPTION_VENDOR_ID, OPTION_PRODUCT_RICOLA_LIGHT) },
@@ -1847,7 +1839,6 @@ static struct usb_serial_driver option_1port_device = {
 #ifdef CONFIG_PM
 	.suspend           = usb_wwan_suspend,
 	.resume            = usb_wwan_resume,
-	.reset_resume	   = usb_wwan_resume,
 #endif
 };
 
@@ -1889,42 +1880,6 @@ static int option_probe(struct usb_serial *serial,
 	if (dev_desc->idVendor == cpu_to_le16(SAMSUNG_VENDOR_ID) &&
 	    dev_desc->idProduct == cpu_to_le16(SAMSUNG_PRODUCT_GT_B3730) &&
 	    iface_desc->bInterfaceClass != USB_CLASS_CDC_DATA)
-		return -ENODEV;
-
-	/* EM3630 */
-	if (serial->dev->descriptor.idVendor == 0x19d2 &&
-		serial->dev->descriptor.idProduct == 0x1476 &&
-		serial->interface->cur_altsetting->desc. bInterfaceNumber == 3)
-		return -ENODEV;
-
-	if (serial->dev->descriptor.idVendor == 0x19d2 &&
-		serial->dev->descriptor.idProduct == 0x1476 &&
-		serial->interface->cur_altsetting->desc. bInterfaceNumber == 4)
-		return -ENODEV;
-
-	if (serial->dev->descriptor.idVendor == 0x19d2 &&
-		serial->dev->descriptor.idProduct == 0x1509 &&
-		serial->interface->cur_altsetting->desc. bInterfaceNumber == 4)
-		return -ENODEV;
-
-	if (serial->dev->descriptor.idVendor == 0x19d2 &&
-		serial->dev->descriptor.idProduct == 0x1509 &&
-		serial->interface->cur_altsetting->desc. bInterfaceNumber == 5)
-		return -ENODEV;
-
-	/* EC20  */
-	if (dev_desc->idVendor == cpu_to_le16(0x05c6) && 
-		dev_desc->idProduct == cpu_to_le16(0x9003) &&
-		iface_desc->bInterfaceNumber >= 4)
-		return -ENODEV;
-
-	if (dev_desc->idVendor == cpu_to_le16(0x05c6) &&
-		dev_desc->idProduct == cpu_to_le16(0x9215) &&
-		iface_desc->bInterfaceNumber >= 4)
-		return -ENODEV;
-	
-	if (dev_desc->idVendor == cpu_to_le16(0x2c7c) &&
-		iface_desc->bInterfaceNumber >= 4)
 		return -ENODEV;
 
 	/* Store the blacklist info so we can use it during attach. */

@@ -68,7 +68,7 @@
 #define EDT_NAME_LEN			23
 #define EDT_SWITCH_MODE_RETRIES		10
 #define EDT_SWITCH_MODE_DELAY		5 /* msec */
-#define EDT_RAW_DATA_RETRIES		10
+#define EDT_RAW_DATA_RETRIES		100
 #define EDT_RAW_DATA_DELAY		1 /* msec */
 
 enum edt_ver {
@@ -174,12 +174,25 @@ static irqreturn_t edt_ft5x06_ts_isr(int irq, void *dev_id)
 	int i, type, x, y, id;
 	int offset, tplen, datalen;
 	int error;
-	bool down;
 
-	cmd = 0x02; 	/* 0X02是触摸状态寄存器 */
-	offset = 1; 	/* 偏移1，也就是0X02+1=0x03,从0X03开始是触摸值 */
-	tplen = 6;		/* 一个触摸点有6个寄存器来保存触摸值 */
-	datalen = 29;	/* 数据读取长度为29 */
+	switch (tsdata->version) {
+	case M06:
+		cmd = 0xf9; /* tell the controller to send touch data */
+		offset = 5; /* where the actual touch data starts */
+		tplen = 4;  /* data comes in so called frames */
+		datalen = 26; /* how much bytes to listen for */
+		break;
+
+	case M09:
+		cmd = 0x02;
+		offset = 1;
+		tplen = 6;
+		datalen = 29;
+		break;
+
+	default:
+		goto out;
+	}
 
 	memset(rdbuf, 0, sizeof(rdbuf));
 
@@ -192,27 +205,35 @@ static irqreturn_t edt_ft5x06_ts_isr(int irq, void *dev_id)
 		goto out;
 	}
 
-	/* 上报每一个触摸点坐标 */
+	/* M09 does not send header or CRC */
+	if (tsdata->version == M06) {
+		if (rdbuf[0] != 0xaa || rdbuf[1] != 0xaa ||
+			rdbuf[2] != datalen) {
+			dev_err_ratelimited(dev,
+					"Unexpected header: %02x%02x%02x!\n",
+					rdbuf[0], rdbuf[1], rdbuf[2]);
+			goto out;
+		}
+
+		if (!edt_ft5x06_ts_check_crc(tsdata, rdbuf, datalen))
+			goto out;
+	}
+
 	for (i = 0; i < MAX_SUPPORT_POINTS; i++) {
 		u8 *buf = &rdbuf[i * tplen + offset];
+		bool down;
 
-		/* 以第一个触摸点为例，寄存器TOUCH1_XH(地址0X03),各位描述如下：
-		 * bit7:6  Event flag  0:按下 1:释放 2：接触 3：没有事件
-		 * bit5:4  保留
-		 * bit3:0  X轴触摸点的11~8位。
-		 */
-		type = buf[0] >> 6;     /* 获取触摸类型 */
+		type = buf[0] >> 6;
+		/* ignore Reserved events */
 		if (type == TOUCH_EVENT_RESERVED)
 			continue;
- 
-		/* 我们所使用的触摸屏和FT5X06是反过来的 */
-		x = ((buf[2] << 8) | buf[3]) & 0x0fff;
-		y = ((buf[0] << 8) | buf[1]) & 0x0fff;
-		
-		/* 以第一个触摸点为例，寄存器TOUCH1_YH(地址0X05),各位描述如下：
-		 * bit7:4  Touch ID  触摸ID，表示是哪个触摸点
-		 * bit3:0  Y轴触摸点的11~8位。
-		 */
+
+		/* M06 sometimes sends bogus coordinates in TOUCH_DOWN */
+		if (tsdata->version == M06 && type == TOUCH_EVENT_DOWN)
+			continue;
+
+		x = ((buf[0] << 8) | buf[1]) & 0x0fff;
+		y = ((buf[2] << 8) | buf[3]) & 0x0fff;
 		id = (buf[2] >> 4) & 0x0f;
 		down = type != TOUCH_EVENT_UP;
 
@@ -920,8 +941,7 @@ static int edt_ft5x06_i2c_ts_probe_dt(struct device *dev,
 	 * irq_pin is not needed for DT setup.
 	 * irq is associated via 'interrupts' property in DT
 	 */
-	//tsdata->irq_pin = -EINVAL;
-	tsdata->irq_pin = of_get_named_gpio(np, "interrupt-gpios", 0);
+	tsdata->irq_pin = -EINVAL;
 	tsdata->reset_pin = of_get_named_gpio(np, "reset-gpios", 0);
 	tsdata->wake_pin = of_get_named_gpio(np, "wake-gpios", 0);
 
@@ -965,7 +985,7 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client,
 		tsdata->irq_pin = pdata->irq_pin;
 		tsdata->wake_pin = -EINVAL;
 	}
-	
+
 	error = edt_ft5x06_ts_reset(client, tsdata);
 	if (error)
 		return error;
@@ -1015,24 +1035,17 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client,
 	input->id.bustype = BUS_I2C;
 	input->dev.parent = &client->dev;
 
-	//__set_bit(EV_KEY, input->evbit);
+	__set_bit(EV_KEY, input->evbit);
 	__set_bit(EV_ABS, input->evbit);
 	__set_bit(BTN_TOUCH, input->keybit);
-
-	#if 0
 	input_set_abs_params(input, ABS_X, 0, tsdata->num_x * 64 - 1, 0, 0);
 	input_set_abs_params(input, ABS_Y, 0, tsdata->num_y * 64 - 1, 0, 0);
 	input_set_abs_params(input, ABS_MT_POSITION_X,
 			     0, tsdata->num_x * 64 - 1, 0, 0);
 	input_set_abs_params(input, ABS_MT_POSITION_Y,
 			     0, tsdata->num_y * 64 - 1, 0, 0);
-	#endif
-	input_set_abs_params(input, ABS_X, 0, 1024, 0, 0);
-	input_set_abs_params(input, ABS_Y, 0, 600, 0, 0);
-	input_set_abs_params(input, ABS_MT_POSITION_X,0, 1024, 0, 0);
-	input_set_abs_params(input, ABS_MT_POSITION_Y,0, 600, 0, 0);
-			     
-		if (!pdata)
+
+	if (!pdata)
 		touchscreen_parse_of_params(input);
 
 	error = input_mt_init_slots(input, MAX_SUPPORT_POINTS, 0);
@@ -1043,12 +1056,6 @@ static int edt_ft5x06_ts_probe(struct i2c_client *client,
 
 	input_set_drvdata(input, tsdata);
 	i2c_set_clientdata(client, tsdata);
-
-
-	/* zuozhongkai 2019/1/30 */	
-	//printk("tsdata->irq_pin=%d\r\n",tsdata->irq_pin);
-	gpio_request(tsdata->irq_pin, "interrupt-gpios");
-	gpio_direction_input(tsdata->irq_pin);
 
 	error = devm_request_threaded_irq(&client->dev, client->irq, NULL,
 					edt_ft5x06_ts_isr,

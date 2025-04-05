@@ -61,5 +61,3 @@ obj-$(CONFIG_BCMDHD)	+= bcmdhd/
 
 obj-$(CONFIG_CW1200)	+= cw1200/
 obj-$(CONFIG_RSI_91X)	+= rsi/
-
-obj-y += realtek/
