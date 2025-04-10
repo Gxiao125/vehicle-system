@@ -18,6 +18,7 @@
  *                                                                   USA
  */
 
+%option bison-locations
 %option noyywrap nounput noinput never-interactive
 
 %x INCLUDE
