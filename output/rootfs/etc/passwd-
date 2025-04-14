@@ -1,0 +1,5 @@
+root:x:0:0:root:/root:/bin/sh
+zuozhongkai:Vo90ROxqqjoyw:1000:1000:Linux User,,,:/home/zuozhongkai:/bin/sh
+ftp:bHQctletmemMI:1001:1001:Linux User,,,:/home/ftp:/bin/sh
+nobody:vkNb8mDL9tb32:1002:1002:Linux User,,,:/home/nobody:/bin/sh
+sshd:.SdkTXH12Q3WI:1003:1003:Linux User,,,:/home/sshd:/bin/sh

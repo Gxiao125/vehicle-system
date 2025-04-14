@@ -1,0 +1,9 @@
+prefix=/home/zuozhongkai/linux/IMX6ULL/tool/libopenssl
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: OpenSSL
+Description: Secure Sockets Layer and cryptography libraries and tools
+Version: 1.1.1e-dev
+Requires: libssl libcrypto
