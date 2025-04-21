@@ -6,7 +6,7 @@ PROJECT_ROOT="$SCRIPT_DIR/.."
 OUTPUT_DIR="$PROJECT_ROOT/output"
 
 # 工具链路径
-TOOLCHAIN="$PROJECT_ROOT/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-"
+TOOLCHAIN="$PROJECT_ROOT/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-"
 
 # 清理函数
 clean() {
