@@ -1,0 +1,22 @@
+# Aliases extracted from modules themselves.
+alias fs-msdos msdos
+alias fs-binfmt_misc binfmt_misc
+alias iso9660 isofs
+alias fs-iso9660 isofs
+alias fs-udf udf
+alias sdio:c*v02D0d4354* brcmfmac
+alias sdio:c*v02D0d4345* brcmfmac
+alias sdio:c*v02D0dA9A6* brcmfmac
+alias sdio:c*v02D0d4335* brcmfmac
+alias sdio:c*v02D0dA962* brcmfmac
+alias sdio:c*v02D0dA94D* brcmfmac
+alias sdio:c*v02D0dA94C* brcmfmac
+alias sdio:c*v02D0d4334* brcmfmac
+alias sdio:c*v02D0d4330* brcmfmac
+alias sdio:c*v02D0d4329* brcmfmac
+alias sdio:c*v02D0d4324* brcmfmac
+alias sdio:c*v02D0dA887* brcmfmac
+alias tty-ldisc-2 serport
+alias serio:ty05pr*id*ex* psmouse
+alias serio:ty01pr*id*ex* psmouse
+alias input:b*v*p*e*-e*k*r*a*m*l*s*f*w* evbug

@@ -28,6 +28,26 @@ static ssize_t temp_show(struct device *dev, struct device_attribute *attr, char
     return sprintf(buf, "%d\n", temp*625/100);
 }
 
-static DEVICE_ATTR_RO(temp);
+static DEVICE_ATTR_RO(temp); //只读
 
+static int ds18b20_probe(struct platform_device *pdev)
+{
+    struct ds18b20_data *data;
+    data = devm_kzalloc(&pdev->dev, NULL, GPIO_OUT_LOW);
+
+    data->gpio = devm_gpiod_get(&pdev->dev, &dev_attr_temp);
+    mutex_init(&data->lock);
+
+    device_create_file(&pdev->dev, &dev_attr_temp);
+
+    return 0;
+
+}
+
+static struct platform_driver ds18b20_driver = {
+    .driver = { .name = DEVICE_NAME},
+    .probe = ds18b20_probe,
+};
+
+module_platform_driver(ds18b20_driver);
 

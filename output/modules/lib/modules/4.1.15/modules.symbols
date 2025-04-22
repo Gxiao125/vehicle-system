@@ -1,0 +1,27 @@
+# Aliases for symbols, used by symbol_request().
+alias symbol:brcmu_pktq_pflush brcmutil
+alias symbol:crc_itu_t_table crc_itu_t
+alias symbol:brcmu_pktq_init brcmutil
+alias symbol:brcmu_pktq_pdeq_match brcmutil
+alias symbol:i2c_pca_add_bus i2c_algo_pca
+alias symbol:i2c_pca_add_numbered_bus i2c_algo_pca
+alias symbol:crc32c libcrc32c
+alias symbol:brcmu_dotrev_str brcmutil
+alias symbol:crc7_be crc7
+alias symbol:brcmu_pktq_penq_head brcmutil
+alias symbol:i2c_pcf_add_bus i2c_algo_pcf
+alias symbol:brcmu_pktq_pdeq brcmutil
+alias symbol:crc_ccitt crc_ccitt
+alias symbol:brcmu_pktq_penq brcmutil
+alias symbol:brcmu_boardrev_str brcmutil
+alias symbol:brcmu_pktq_mdeq brcmutil
+alias symbol:brcmu_pkt_buf_free_skb brcmutil
+alias symbol:brcmu_pkt_buf_get_skb brcmutil
+alias symbol:brcmu_pktq_flush brcmutil
+alias symbol:crc_itu_t crc_itu_t
+alias symbol:brcmu_pktq_pdeq_tail brcmutil
+alias symbol:crc7_be_syndrome_table crc7
+alias symbol:brcmu_d11_attach brcmutil
+alias symbol:brcmu_pktq_peek_tail brcmutil
+alias symbol:brcmu_pktq_mlen brcmutil
+alias symbol:crc_ccitt_table crc_ccitt
