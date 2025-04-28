@@ -129,22 +129,22 @@ build_drivers() {
 }
 
 # 同步根文件系统
-sync_rootfs() {
-    color_echo "${YELLOW}" "Preparing root filesystem..."
-    local rootfs_src="$PROJECT_ROOT/rootfs"
-    local rootfs_dest="$OUTPUT_DIR/rootfs"
+# sync_rootfs() {
+#     color_echo "${YELLOW}" "Preparing root filesystem..."
+#     local rootfs_src="$PROJECT_ROOT/rootfs"
+#     local rootfs_dest="$OUTPUT_DIR/rootfs"
     
-    [ -d "$rootfs_src" ] || error_exit "RootFS source directory not found"
+#     [ -d "$rootfs_src" ] || error_exit "RootFS source directory not found"
     
-    rsync -aq --delete "$rootfs_src/" "$rootfs_dest/"
+#     rsync -aq --delete "$rootfs_src/" "$rootfs_dest/"
     
-    # 部署内核模块
-    if [ -d "$OUTPUT_DIR/modules" ]; then
-        rsync -a "$OUTPUT_DIR/modules/lib/" "$rootfs_dest/"
-    fi
+#     # 部署内核模块
+#     if [ -d "$OUTPUT_DIR/modules" ]; then
+#         rsync -a "$OUTPUT_DIR/modules/lib/" "$rootfs_dest/"
+#     fi
     
-    color_echo "${GREEN}" "RootFS prepared: $rootfs_dest"
-}
+#     color_echo "${GREEN}" "RootFS prepared: $rootfs_dest"
+# }
 
 # 显示构建报告
 show_report() {
@@ -210,7 +210,7 @@ main() {
     build_uboot
     build_kernel
     build_drivers
-    sync_rootfs
+    # sync_rootfs
     
     show_report
 }

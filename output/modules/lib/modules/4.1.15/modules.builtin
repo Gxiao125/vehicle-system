@@ -87,6 +87,8 @@ kernel/drivers/i2c/i2c-dev.ko
 kernel/drivers/i2c/i2c-mux.ko
 kernel/drivers/i2c/algos/i2c-algo-bit.ko
 kernel/drivers/i2c/busses/i2c-imx.ko
+kernel/drivers/iio/industrialio.ko
+kernel/drivers/iio/adc/vf610_adc.ko
 kernel/drivers/input/input-core.ko
 kernel/drivers/input/input-polldev.ko
 kernel/drivers/input/matrix-keymap.ko
