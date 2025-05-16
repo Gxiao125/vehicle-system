@@ -1,6 +1,7 @@
 #
 #  Makefile for the Linux Controller Area Network drivers.
 #
+subdir-ccflags-y += -I$(INCLUDE_DIR)
 
 obj-$(CONFIG_CAN_VCAN)		+= vcan.o
 obj-$(CONFIG_CAN_SLCAN)		+= slcan.o

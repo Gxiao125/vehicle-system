@@ -41,6 +41,8 @@
 #include <linux/platform_device.h>
 #include <linux/regulator/consumer.h>
 #include <linux/regmap.h>
+#include <flexcan.h>
+
 
 #define DRV_NAME			"flexcan"
 
@@ -204,6 +206,12 @@
 #define FLEXCAN_HAS_BROKEN_ERR_STATE	BIT(2) /* [TR]WRN_INT not connected */
 #define FLEXCAN_HAS_MECR_FEATURES	BIT(3) /* Memory error detection */
 
+
+/*dma*/
+#define FLEXCAN_TX_DMA_CHAN   0
+#define FLEXCAN_TX_MB_OFFSET  offsetof(struct flexcan_regs, cantxfg[FLEXCAN_TX_BUF_ID])
+
+
 /* Structure of the message buffer */
 struct flexcan_mb {
 	u32 can_ctrl;
@@ -272,6 +280,17 @@ struct flexcan_priv {
 	struct regulator *reg_xceiver;
 	struct flexcan_stop_mode stm;
 	int id;
+
+	/*----transport-----*/
+	void (*transport_rx_callback) (struct can_frame *frame); //接收回调
+	struct module *transport_owner; //引用模块
+	spinlock_t tx_lock;	//发送锁
+
+	/*dma*/
+	bool dma_setup_done;
+	dma_addr_t base_phys;
+	struct dma_chan *tx_chan;
+
 };
 
 static struct flexcan_devtype_data fsl_p1010_devtype_data = {
@@ -303,6 +322,7 @@ static const struct can_bittiming_const flexcan_bittiming_const = {
  * else uses little-endian registers, independent of CPU
  * endianess.
  */
+
 #if defined(CONFIG_PPC)
 static inline u32 flexcan_read(void __iomem *addr)
 {
@@ -373,6 +393,146 @@ static inline int flexcan_has_and_handle_berr(const struct flexcan_priv *priv,
 	return (priv->can.ctrlmode & CAN_CTRLMODE_BERR_REPORTING) &&
 		(reg_esr & FLEXCAN_ESR_ERR_BUS);
 }
+
+
+int register_flexcan_transport(struct net_device *dev, void (*rx_callback)(struct can_frame*), struct module *owner)
+{
+	struct flexcan_priv *priv = netdev_priv(dev);
+	if (priv->transport_rx_callback)
+		return 0;
+
+	priv->transport_rx_callback = rx_callback;
+	priv->transport_owner = owner;
+
+	return 0;
+}
+EXPORT_SYMBOL(register_flexcan_transport);
+
+void unregister_flexcan_transport(struct net_device *dev)
+{
+	struct flexcan_priv *priv = netdev_priv(dev);
+	priv->transport_rx_callback = NULL;
+	module_put(priv->transport_owner);
+}
+EXPORT_SYMBOL(unregister_flexcan_transport);
+
+int flexcan_transport_send(struct net_device *dev, struct can_frame *cf)
+{
+	struct flexcan_priv *priv = netdev_priv(dev);
+	struct flexcan_regs __iomem *regs = priv->base;
+	unsigned long flags;
+	u32 can_id, ctrl;
+
+	if (!priv->transport_owner)
+		return -ENODEV;
+
+	if (cf->can_dlc > 8)
+		return -EINVAL;
+
+	spin_lock_irqsave(&priv->tx_lock, flags);
+
+	//构建控制字
+	ctrl = FLEXCAN_MB_CNT_CODE(0xc) | (cf->can_dlc << 16);
+	if (cf->can_id & CAN_EFF_FLAG){
+		can_id = cf->can_id & CAN_EFF_MASK;
+		ctrl |= FLEXCAN_MB_CNT_IDE | FLEXCAN_MB_CNT_SRR;
+	} else {
+		can_id = (cf -> can_id & CAN_SFF_MASK) << 18;
+	}
+	if (cf->can_id & CAN_RTR_FLAG)
+		ctrl |= FLEXCAN_MB_CNT_RTR;
+
+	//写入发送邮箱
+	if (cf->can_dlc > 0) {
+		u32 data = be32_to_cpup((__be32 *)&cf->data[0]);
+		flexcan_write(data, &regs->cantxfg[FLEXCAN_TX_BUF_ID].data[0]);
+	}
+
+	if (cf->can_dlc > 3){
+		u32 data = be32_to_cpup((__be32 *)&cf->data[4]);
+		flexcan_write(data, &regs->cantxfg[FLEXCAN_TX_BUF_ID].data[1]);
+	}
+
+	//写入CAN ID 和 控制段
+	flexcan_write(can_id, &regs->cantxfg[FLEXCAN_TX_BUF_ID].can_id);
+	flexcan_write(ctrl, &regs->cantxfg[FLEXCAN_TX_BUF_ID].can_ctrl);
+
+	//处理硬件特定逻辑
+	flexcan_write(FLEXCAN_MB_CODE_TX_INACTIVE, &regs->cantxfg[FLEXCAN_TX_BUF_RESERVED].can_ctrl);
+	flexcan_write(FLEXCAN_MB_CODE_TX_INACTIVE, &regs->cantxfg[FLEXCAN_TX_BUF_RESERVED].can_ctrl);
+
+	spin_unlock_irqrestore(&priv->tx_lock, flags);
+	return  0;
+}
+EXPORT_SYMBOL(flexcan_transport_send);
+
+int flexcan_dma_send(struct net_device *dev, dma_addr_t dma_addr)
+{
+	struct flexcan_priv *priv = netdev_priv(dev);
+	struct dma_chan *chan;
+	struct dma_async_tx_descriptor *desc;
+	struct dma_slave_config config = {0};
+	dma_cookie_t cookie;
+	int ret = 0;
+	unsigned long flags;
+
+	if (!priv->dma_setup_done) {
+		chan = dma_request_slave_channel(dev->dev.parent, "tx");
+		if (!chan) {
+			printk( "Failed to get DMA channel\n");
+			return -EIO;
+		}
+		priv->tx_chan = chan;
+		priv->dma_setup_done = true;
+	}
+
+	spin_lock_irqsave(&priv->tx_lock, flags);
+
+	config.dst_addr = priv->base_phys + FLEXCAN_TX_MB_OFFSET;
+	config.dst_addr_width = DMA_SLAVE_BUSWIDTH_4_BYTES;
+	config.direction = DMA_MEM_TO_DEV;
+
+	ret = dmaengine_slave_config(priv ->tx_chan, &config);
+	if (ret) {
+		printk("DMA set failed\n");
+		goto unlock;
+	}
+
+	desc = dmaengine_prep_slave_single(priv->tx_chan,
+										dma_addr,
+										sizeof(struct can_frame),
+										DMA_MEM_TO_DEV,
+									    DMA_PREP_INTERRUPT | DMA_CTRL_ACK);
+
+	if (!desc) {
+		printk("Failed to prepare DMA descriptor \n");
+		ret = -EIO;
+		goto unlock;
+	}
+
+
+	cookie = dmaengine_submit(desc);
+	if (dma_submit_error(cookie)) {
+		printk("Failed to submit DMA \n");
+		ret = -EIO;
+		goto unlock;
+	}
+
+	//send
+	dma_async_issue_pending(priv->tx_chan);
+
+	if (dma_sync_wait(priv->tx_chan, cookie) != DMA_COMPLETE) {
+		printk("DMA transfer failed \n");
+		ret = -EIO;
+	}
+
+	unlock:
+		spin_lock_irqsave(&priv->tx_lock, flags);
+		return ret;
+
+}
+EXPORT_SYMBOL(flexcan_dma_send);
+
 
 static int flexcan_chip_enable(struct flexcan_priv *priv)
 {
@@ -504,48 +664,66 @@ static int flexcan_get_berr_counter(const struct net_device *dev,
 
 static int flexcan_start_xmit(struct sk_buff *skb, struct net_device *dev)
 {
-	const struct flexcan_priv *priv = netdev_priv(dev);
-	struct flexcan_regs __iomem *regs = priv->base;
+	
+	// const struct flexcan_priv *priv = netdev_priv(dev);
+	// struct flexcan_regs __iomem *regs = priv->base;
+	// struct can_frame *cf = (struct can_frame *)skb->data;
+	// u32 can_id;
+	// u32 ctrl = FLEXCAN_MB_CNT_CODE(0xc) | (cf->can_dlc << 16);
+
+	// if (can_dropped_invalid_skb(dev, skb))
+	// 	return NETDEV_TX_OK;
+
+	// netif_stop_queue(dev);
+
+	// if (cf->can_id & CAN_EFF_FLAG) {
+	// 	can_id = cf->can_id & CAN_EFF_MASK;
+	// 	ctrl |= FLEXCAN_MB_CNT_IDE | FLEXCAN_MB_CNT_SRR;
+	// } else {
+	// 	can_id = (cf->can_id & CAN_SFF_MASK) << 18;
+	// }
+
+	// if (cf->can_id & CAN_RTR_FLAG)
+	// 	ctrl |= FLEXCAN_MB_CNT_RTR;
+
+	// if (cf->can_dlc > 0) {
+	// 	u32 data = be32_to_cpup((__be32 *)&cf->data[0]);
+	// 	flexcan_write(data, &regs->cantxfg[FLEXCAN_TX_BUF_ID].data[0]);
+	// }
+	// if (cf->can_dlc > 3) {
+	// 	u32 data = be32_to_cpup((__be32 *)&cf->data[4]);
+	// 	flexcan_write(data, &regs->cantxfg[FLEXCAN_TX_BUF_ID].data[1]);
+	// }
+
+	// can_put_echo_skb(skb, dev, 0);
+
+	// flexcan_write(can_id, &regs->cantxfg[FLEXCAN_TX_BUF_ID].can_id);
+	// flexcan_write(ctrl, &regs->cantxfg[FLEXCAN_TX_BUF_ID].can_ctrl);
+
+	// /* Errata ERR005829 step8:
+	//  * Write twice INACTIVE(0x8) code to first MB.
+	//  */
+	// flexcan_write(FLEXCAN_MB_CODE_TX_INACTIVE,
+	// 	      &regs->cantxfg[FLEXCAN_TX_BUF_RESERVED].can_ctrl);
+	// flexcan_write(FLEXCAN_MB_CODE_TX_INACTIVE,
+	// 	      &regs->cantxfg[FLEXCAN_TX_BUF_RESERVED].can_ctrl);
+	 
 	struct can_frame *cf = (struct can_frame *)skb->data;
-	u32 can_id;
-	u32 ctrl = FLEXCAN_MB_CNT_CODE(0xc) | (cf->can_dlc << 16);
+	// struct flexcan_priv *priv = netdev_priv(dev);
+	int ret;
 
-	if (can_dropped_invalid_skb(dev, skb))
+	// if (can_dropped_invalid_skb(dev, skb))
+	// 	return NETDEV_TX_OK;
+
+	// netif_stop_queue(dev);
+
+	ret = flexcan_transport_send(dev, cf);
+	if (ret) {
+		dev->stats.tx_dropped++;
 		return NETDEV_TX_OK;
-
-	netif_stop_queue(dev);
-
-	if (cf->can_id & CAN_EFF_FLAG) {
-		can_id = cf->can_id & CAN_EFF_MASK;
-		ctrl |= FLEXCAN_MB_CNT_IDE | FLEXCAN_MB_CNT_SRR;
-	} else {
-		can_id = (cf->can_id & CAN_SFF_MASK) << 18;
 	}
 
-	if (cf->can_id & CAN_RTR_FLAG)
-		ctrl |= FLEXCAN_MB_CNT_RTR;
-
-	if (cf->can_dlc > 0) {
-		u32 data = be32_to_cpup((__be32 *)&cf->data[0]);
-		flexcan_write(data, &regs->cantxfg[FLEXCAN_TX_BUF_ID].data[0]);
-	}
-	if (cf->can_dlc > 3) {
-		u32 data = be32_to_cpup((__be32 *)&cf->data[4]);
-		flexcan_write(data, &regs->cantxfg[FLEXCAN_TX_BUF_ID].data[1]);
-	}
-
-	can_put_echo_skb(skb, dev, 0);
-
-	flexcan_write(can_id, &regs->cantxfg[FLEXCAN_TX_BUF_ID].can_id);
-	flexcan_write(ctrl, &regs->cantxfg[FLEXCAN_TX_BUF_ID].can_ctrl);
-
-	/* Errata ERR005829 step8:
-	 * Write twice INACTIVE(0x8) code to first MB.
-	 */
-	flexcan_write(FLEXCAN_MB_CODE_TX_INACTIVE,
-		      &regs->cantxfg[FLEXCAN_TX_BUF_RESERVED].can_ctrl);
-	flexcan_write(FLEXCAN_MB_CODE_TX_INACTIVE,
-		      &regs->cantxfg[FLEXCAN_TX_BUF_RESERVED].can_ctrl);
+	// can_put_echo_skb(skb, dev, 0);
 
 	return NETDEV_TX_OK;
 }
@@ -692,16 +870,23 @@ static int flexcan_read_frame(struct net_device *dev)
 {
 	struct net_device_stats *stats = &dev->stats;
 	struct can_frame *cf;
-	struct sk_buff *skb;
+	// struct sk_buff *skb;
+	struct flexcan_priv *priv = netdev_priv(dev);
 
-	skb = alloc_can_skb(dev, &cf);
-	if (unlikely(!skb)) {
-		stats->rx_dropped++;
-		return 0;
-	}
+	// skb = alloc_can_skb(dev, &cf);
+	// if (unlikely(!skb)) {
+	// 	stats->rx_dropped++;
+	// 	return 0;
+	// }
 
 	flexcan_read_fifo(dev, cf);
-	netif_receive_skb(skb);
+	// netif_receive_skb(skb);
+
+	if (priv->transport_rx_callback) {
+        try_module_get(priv->transport_owner); // 增加模块引用计数
+        priv->transport_rx_callback(cf);
+        module_put(priv->transport_owner);
+	}
 
 	stats->rx_packets++;
 	stats->rx_bytes += cf->can_dlc;
@@ -1259,6 +1444,19 @@ static int flexcan_probe(struct platform_device *pdev)
 	u32 clock_freq = 0;
 	int wakeup = 1;
 
+	/*dma 物理地址*/
+	struct resource *res;
+
+	res = platform_get_resource(pdev, IORESOURCE_MEM, 0);
+	if (!res){
+		printk("error: platform_get_resource get res failed \n");
+		return -ENODEV;
+	}
+
+	priv->base_phys = res->start;
+	priv->dma_setup_done = false;
+	/*dma*/
+
 	reg_xceiver = devm_regulator_get(&pdev->dev, "xceiver");
 	if (PTR_ERR(reg_xceiver) == -EPROBE_DEFER)
 		return -EPROBE_DEFER;
@@ -1364,6 +1562,11 @@ static int flexcan_remove(struct platform_device *pdev)
 {
 	struct net_device *dev = platform_get_drvdata(pdev);
 	struct flexcan_priv *priv = netdev_priv(dev);
+
+	if (priv->tx_chan) {
+		dma_release_channel(priv->tx_chan);
+		priv->tx_chan = NULL;
+	}
 
 	unregister_flexcandev(dev);
 	netif_napi_del(&priv->napi);

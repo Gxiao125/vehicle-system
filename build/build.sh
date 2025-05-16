@@ -6,7 +6,6 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
-
 # 初始化环境
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 PROJECT_ROOT=$(realpath "$SCRIPT_DIR/..")
@@ -19,7 +18,8 @@ source "$PROJECT_ROOT/build/config.env"
 
 # 工具链配置
 export ARCH=arm
-export CROSS_COMPILE="$PROJECT_ROOT/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-"
+export CROSS_COMPILE=arm-linux-gnueabihf-
+
 
 # 组件版本
 UBOOT_VERSION="2015.04"
@@ -110,27 +110,14 @@ build_kernel() {
 }
 
 # 编译外部驱动模块
-build_drivers() {
-    color_echo "${YELLOW}" "Building external drivers..."
-    local drivers_dir="$PROJECT_ROOT/drivers/kernel"
-    local modules_dir="$OUTPUT_DIR/modules"
-    
-    [ -d "$drivers_dir" ] || return 0
-    
-    find "$drivers_dir" -name "Makefile" | while read makefile; do
-        local mod_dir=$(dirname "$makefile")
-        color_echo "${YELLOW}" "Building module in $mod_dir"
+# build_drivers() {
+
         
-        make -C "$kernel_dir" M="$mod_dir" modules || error_exit "Driver build failed in $mod_dir"
-        make -C "$kernel_dir" M="$mod_dir" INSTALL_MOD_PATH="$modules_dir" modules_install
-    done
-    
-    color_echo "${GREEN}" "Drivers build completed."
-}
+# }
 
 # 同步根文件系统
 # sync_rootfs() {
-#     color_echo "${YELLOW}" "Preparing root filesystem..."
+    # color_echo "${YELLOW}" "Preparing root filesystem..."
 #     local rootfs_src="$PROJECT_ROOT/rootfs"
 #     local rootfs_dest="$OUTPUT_DIR/rootfs"
     
@@ -170,11 +157,11 @@ parse_args() {
                 ;;
             -k|--kernel-only)
                 build_kernel
-                build_drivers
+                # build_drivers
                 exit 0
                 ;;
             -d|--drivers-only)
-                build_drivers
+                # build_drivers
                 exit 0
                 ;;
             -h|--help)
@@ -206,10 +193,16 @@ main() {
     
     color_echo "${YELLOW}" "Starting build process..."
     mkdir -p "$OUTPUT_DIR"
-    
+
+    mkdir -p "$PROJECT_ROOT/transport/include"
+    mkdir -p "$PROJECT_ROOT/transport/driver_can"
+
+    ln -sf "$PROJECT_ROOT/kernel/linux-imx-rel_imx_4.1.15_2.1.0_ga_alientek/drivers/net/can/flexcan.h" "$PROJECT_ROOT/transport/include/flexcan.h"
+    ln -sf "$PROJECT_ROOT/kernel/linux-imx-rel_imx_4.1.15_2.1.0_ga_alientek/drivers/net/can" "$PROJECT_ROOT/transport/driver_can/"
+
     build_uboot
     build_kernel
-    build_drivers
+    # build_drivers
     # sync_rootfs
     
     show_report

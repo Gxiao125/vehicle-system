@@ -1,0 +1,42 @@
+[1;33mStarting build process...[0m
+[1;33mBuilding U-Boot 2015.04...[0m
+  HOSTCC  scripts/basic/fixdep
+  HOSTCC  scripts/kconfig/conf.o
+  SHIPPED scripts/kconfig/zconf.tab.c
+  SHIPPED scripts/kconfig/zconf.lex.c
+  SHIPPED scripts/kconfig/zconf.hash.c
+  HOSTCC  scripts/kconfig/zconf.tab.o
+In file included from scripts/kconfig/zconf.tab.c:2536:
+In function ‘dep_stack_insert’,
+    inlined from ‘sym_check_print_recursive’ at scripts/kconfig/symbol.c:1047:3,
+    inlined from ‘sym_check_deps’ at scripts/kconfig/symbol.c:1218:3:
+scripts/kconfig/symbol.c:1023:19: warning: storing the address of local variable ‘cv_stack’ in ‘check_top’ [-Wdangling-pointer=]
+ 1023 |         check_top = stack;
+      |         ~~~~~~~~~~^~~~~~~
+scripts/kconfig/symbol.c: In function ‘sym_check_deps’:
+scripts/kconfig/symbol.c:1044:26: note: ‘cv_stack’ declared here
+ 1044 |         struct dep_stack cv_stack;
+      |                          ^~~~~~~~
+scripts/kconfig/symbol.c:1014:4: note: ‘check_top’ declared here
+ 1014 | } *check_top;
+      |    ^~~~~~~~~
+  HOSTLD  scripts/kconfig/conf
+#
+# configuration written to .config
+#
+make: arm-linux-gnueabihf-gcc: No such file or directory
+/bin/sh: line 1: arm-linux-gnueabihf-gcc: command not found
+dirname: missing operand
+Try 'dirname --help' for more information.
+scripts/kconfig/conf  --silentoldconfig Kconfig
+  CHK     include/config.h
+  UPD     include/config.h
+  GEN     include/autoconf.mk
+  GEN     include/autoconf.mk.dep
+/bin/sh: line 1: arm-linux-gnueabihf-gcc: command not found
+/bin/sh: line 1: arm-linux-gnueabihf-gcc: command not found
+make[1]: *** [scripts/Makefile.autoconf:50: include/autoconf.mk.dep] Error 1
+make[1]: *** Waiting for unfinished jobs....
+make[1]: *** [scripts/Makefile.autoconf:75: include/autoconf.mk] Error 1
+make: *** No rule to make target 'include/config/auto.conf', needed by 'include/config/uboot.release'.  Stop.
+[0;31mError: U-Boot build failed[0m

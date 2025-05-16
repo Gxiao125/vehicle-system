@@ -807,6 +807,7 @@
 &adc1 {
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_adc1>;
+	num-channels = <2>;
 	vref-supply = <&reg_vref_3v3>;
 	status = "okay";
 };
