@@ -1,1 +1,0 @@
-cmd_/home/xiao/project/vehicle-system/transport/iostp/transport.ko := arm-linux-gnueabihf-ld -EL -r  -T ./scripts/module-common.lds --build-id  -o /home/xiao/project/vehicle-system/transport/iostp/transport.ko /home/xiao/project/vehicle-system/transport/iostp/transport.o /home/xiao/project/vehicle-system/transport/iostp/transport.mod.o
