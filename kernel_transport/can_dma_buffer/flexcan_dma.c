@@ -94,6 +94,7 @@ static int flexcan_dmabuf_mmap(struct dma_buf *dmabuf,
     struct can_dma_buf *priv = dmabuf->priv;
     unsigned long pfn;
     int ret;
+    phys_addr_t phys = virt_to_phys(priv->vaddr);
     
     pr_info("DMA-BUF mmap调用: dmabuf=%p, ops=%p\n", dmabuf, dmabuf->ops);
     
@@ -104,7 +105,6 @@ static int flexcan_dmabuf_mmap(struct dma_buf *dmabuf,
     }
     
     // 打印完整物理地址信息
-    phys_addr_t phys = virt_to_phys(priv->vaddr);
     pr_info("vaddr=%p, dma_handle=%pad, phys=%pap, size=%zu\n",
            priv->vaddr, &priv->dma_handle, &phys, CAN_FRAME_SIZE);
     
@@ -183,11 +183,16 @@ static const struct dma_buf_ops flexcan_dmabuf_ops = {
 
 /* 字符设备操作 */
 
-#define GET_TX_BUF  _IOR('F', 0, int)
-#define GET_TX_DONE _IOR('F', 2, int)
-#define GET_RX_BUF _IOR('F', 1, int)
+#define GET_TX_BUF       _IOR('F', 0, int)
+#define GET_TX_DONE      _IOR('F', 2, int)
 
-#define GET_RX_DONE _IOR('F', 3, int)
+// 新增高效命令
+#define GET_ALL_RX_BUFS  _IOR('F', 4, int[DMA_POOL_SIZE]) // 获取所有RX缓冲区的fd
+#define GET_READY_INDEX  _IOR('F', 5, int)               // 获取就绪缓冲区索引
+#define RELEASE_BUF      _IOR('F', 6, int)               // 通过索引释放缓冲区
+#define GET_READY_COUNT  _IOR('F', 7, int)               // 获取就绪缓冲区数量
+
+
 static long flexcan_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
     struct flexcan_dma_ring *ring = filp->private_data;
@@ -196,24 +201,46 @@ static long flexcan_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
     unsigned long flags = 0;
     int found = -1;
     DEFINE_WAIT(wait); 
-    u32 head, tail;
+    u32 head, tail,avail;
+    int fds[DMA_POOL_SIZE];
+    int i,err;
+
 
     switch (cmd) {
 
-        case GET_TX_BUF:
-            idx = atomic_inc_return(&ring->tx_prod) % DMA_POOL_SIZE;
-            get_dma_buf(ring->tx_bufs[idx].dma_buf); // 增加引用计数
-            ret = dma_buf_fd(ring->tx_bufs[idx].dma_buf, O_CLOEXEC);
-            put_user(ret, uarg);
-            break;
+        case GET_ALL_RX_BUFS:
+            
+            // 获取所有缓冲区的fd
+            for (i = 0; i < DMA_POOL_SIZE; i++) {
+                get_dma_buf(ring->rx_bufs[i].dma_buf);
+                fds[i] = dma_buf_fd(ring->rx_bufs[i].dma_buf, O_CLOEXEC);
+                if (fds[i] < 0) {
+                    err = fds[i];
+                    // 释放之前创建的fd
+                    while (--i >= 0) {
+                        dma_buf_put(ring->rx_bufs[i].dma_buf);
+                    }
+                    return err;
+                }
+            }
 
-        case GET_RX_BUF: 
+             if (copy_to_user((void __user *)arg, fds, sizeof(fds))) {
+                for (i = 0; i < DMA_POOL_SIZE; i++) {
+                    dma_buf_put(ring->rx_bufs[i].dma_buf);
+                }
+                return -EFAULT;
+            }
+
+             break;
+
+
+        case GET_READY_INDEX: 
             spin_lock_irqsave(&ring->rx_lock, flags);
             
             while (1) {
                 head = atomic_read(&ring->rx_head);
                 tail = atomic_read(&ring->rx_tail);
-                u32 avail = CIRC_CNT_ME(head, tail, DMA_POOL_SIZE);
+                avail = CIRC_CNT_ME(head, tail, DMA_POOL_SIZE);
                 
                 printk("GET_RX_BUF: head=%u, tail=%u, avail=%u\n", head, tail, avail);
                 
@@ -275,38 +302,61 @@ static long flexcan_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
             
             spin_unlock_irqrestore(&ring->rx_lock, flags);
             
-            if (ret) {
-                return ret;
-            }
+        
             if (found < 0) {
                 return -EAGAIN;
             }
             
-            // 返回找到的缓冲区
-            get_dma_buf(ring->rx_bufs[found].dma_buf);
-            ret = dma_buf_fd(ring->rx_bufs[found].dma_buf, O_CLOEXEC);
-            put_user(ret, uarg);
+           put_user(found, uarg);
             break;
 
-        case GET_RX_DONE: 
 
-            if (copy_from_user(&idx, (void __user *)arg, sizeof(int)))
+        case GET_READY_COUNT:
+            head = atomic_read(&ring->rx_head);
+            tail = atomic_read(&ring->rx_tail);
+            avail = CIRC_CNT_ME(head, tail, DMA_POOL_SIZE);
+            put_user(avail, uarg);
+            break;
+
+
+        case RELEASE_BUF:
+            if (copy_from_user(&idx, (void __user *)arg, sizeof(int))) {
+                pr_err("RELEASE_BUF: copy_from_user 失败\n");
                 return -EFAULT;
+            }
             
-            if (idx < 0 || idx >= DMA_POOL_SIZE)
+            // 添加详细的调试信息
+            pr_info("RELEASE_BUF: index=%d, head=%u, tail=%u\n", 
+                    idx, 
+                    atomic_read(&ring->rx_head),
+                    atomic_read(&ring->rx_tail));
+            
+            if (idx < 0 || idx >= DMA_POOL_SIZE) {
+                pr_err("无效的缓冲区索引: %d\n", idx);
                 return -EINVAL;
+            }
             
             spin_lock_irqsave(&ring->rx_lock, flags);
             
             if (atomic_read(&ring->rx_bufs[idx].status) != FRAME_IN_USE) {
+                pr_warn("缓冲区 %d 状态错误: %d (应为 IN_USE)\n",
+                    idx, atomic_read(&ring->rx_bufs[idx].status));
                 spin_unlock_irqrestore(&ring->rx_lock, flags);
                 return -EINVAL;
             }
             
-            // 只需更新状态，tail 指针已在 GET_RX_BUF 中更新
             atomic_set(&ring->rx_bufs[idx].status, FRAME_FREE);
+            wake_up_interruptible(&ring->rx_wq);
             
             spin_unlock_irqrestore(&ring->rx_lock, flags);
+            break;
+
+            
+        case GET_TX_BUF:
+            idx = atomic_inc_return(&ring->tx_prod) % DMA_POOL_SIZE;
+            get_dma_buf(ring->tx_bufs[idx].dma_buf); // 增加引用计数
+            ret = dma_buf_fd(ring->tx_bufs[idx].dma_buf, O_CLOEXEC);
+            put_user(ret, uarg);
             break;
         
     default:
@@ -342,19 +392,15 @@ static unsigned int flexcan_dma_poll(struct file *filp, poll_table *wait)
 {
     struct flexcan_dma_ring *ring = filp->private_data;
     unsigned int mask = 0;
-    int i;
-    u32 rx_avail;
+    u32 head, tail;
 
     poll_wait(filp, &ring->rx_wq, wait);
 
-    for (i = 0; i < DMA_POOL_SIZE; i++) {
-            if (atomic_read(&ring->rx_bufs[i].status) == FRAME_READY) {
-                rx_avail = 1;
-            }
-        }
+    head = atomic_read(&ring->rx_head);
+    tail = atomic_read(&ring->rx_tail);
 
-    if (rx_avail > 0){
-        mask |= POLLIN;
+    if (CIRC_CNT(head, tail, DMA_POOL_SIZE) > 0) {
+        mask |= POLLIN | POLLRDNORM;
     }
 
     return mask;
@@ -573,7 +619,6 @@ static void frame_timeout_handler(unsigned long data)
 {
     struct flexcan_dma_ring *ring = (struct flexcan_dma_ring *)data;
     unsigned long flags;
-    u32 prod;
     int idx, count = 0;
 
     spin_lock_irqsave(&ring->rx_lock, flags);

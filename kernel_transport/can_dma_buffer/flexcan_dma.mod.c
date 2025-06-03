@@ -40,7 +40,7 @@ __attribute__((section("__versions"))) = {
 	{ 0x275ef902, __VMLINUX_SYMBOL_STR(__init_waitqueue_head) },
 	{ 0x5d6414ab, __VMLINUX_SYMBOL_STR(flexcan_dma_register_ops) },
 	{ 0x67921cca, __VMLINUX_SYMBOL_STR(dev_get_by_name) },
-	{ 0xd85cd67e, __VMLINUX_SYMBOL_STR(__wake_up) },
+	{ 0x72350130, __VMLINUX_SYMBOL_STR(___ratelimit) },
 	{ 0x6fdf3bfa, __VMLINUX_SYMBOL_STR(flexcan_hw_xmit) },
 	{ 0x2d3385d3, __VMLINUX_SYMBOL_STR(system_wq) },
 	{ 0x9963a089, __VMLINUX_SYMBOL_STR(queue_delayed_work_on) },
@@ -51,19 +51,21 @@ __attribute__((section("__versions"))) = {
 	{ 0x37a0cba, __VMLINUX_SYMBOL_STR(kfree) },
 	{ 0x9cd60539, __VMLINUX_SYMBOL_STR(sg_free_table) },
 	{ 0x6ce9c427, __VMLINUX_SYMBOL_STR(remap_pfn_range) },
-	{ 0xd007beca, __VMLINUX_SYMBOL_STR(arm_dma_ops) },
-	{ 0x37ae6cb9, __VMLINUX_SYMBOL_STR(dma_buf_put) },
 	{ 0x3f65663f, __VMLINUX_SYMBOL_STR(dma_buf_export) },
 	{ 0x59175f83, __VMLINUX_SYMBOL_STR(dev_err) },
 	{ 0x5f754e5a, __VMLINUX_SYMBOL_STR(memset) },
 	{ 0xc8b57c27, __VMLINUX_SYMBOL_STR(autoremove_wake_function) },
+	{ 0x67c2fa54, __VMLINUX_SYMBOL_STR(__copy_to_user) },
 	{ 0xfa2a45e, __VMLINUX_SYMBOL_STR(__memzero) },
 	{ 0x1cfb04fa, __VMLINUX_SYMBOL_STR(finish_wait) },
 	{ 0x1000e51, __VMLINUX_SYMBOL_STR(schedule) },
 	{ 0x499cb58c, __VMLINUX_SYMBOL_STR(prepare_to_wait) },
 	{ 0xfbc74f64, __VMLINUX_SYMBOL_STR(__copy_from_user) },
-	{ 0xbc10dd97, __VMLINUX_SYMBOL_STR(__put_user_4) },
+	{ 0x37ae6cb9, __VMLINUX_SYMBOL_STR(dma_buf_put) },
 	{ 0x31be471a, __VMLINUX_SYMBOL_STR(dma_buf_fd) },
+	{ 0xbc10dd97, __VMLINUX_SYMBOL_STR(__put_user_4) },
+	{ 0xd007beca, __VMLINUX_SYMBOL_STR(arm_dma_ops) },
+	{ 0xd85cd67e, __VMLINUX_SYMBOL_STR(__wake_up) },
 	{ 0x7d11c268, __VMLINUX_SYMBOL_STR(jiffies) },
 	{ 0xc8fd727e, __VMLINUX_SYMBOL_STR(mod_timer) },
 	{ 0x51d559d1, __VMLINUX_SYMBOL_STR(_raw_spin_unlock_irqrestore) },
@@ -78,4 +80,4 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "B5D13E2FED14A32B8F7B34F");
+MODULE_INFO(srcversion, "19A881D4698425812CF4AEB");

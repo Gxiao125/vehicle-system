@@ -1,65 +1,113 @@
+#include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <poll.h>
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <time.h>
-#include <stdint.h> // 添加uint64_t支持
+#include <linux/can.h>  // 添加 CAN 帧定义头文件
 
-// 定义驱动接口
-#define GET_TX_BUF _IOR('F', 0, int)
-#define GET_RX_BUF _IOR('F', 1, int)
-#define GET_TX_DONE _IOR('F', 2, int)
-#define GET_RX_DONE _IOR('F', 3, int)
+#define DMA_POOL_SIZE 64
+#define GET_ALL_RX_BUFS  _IOR('F', 4, int[DMA_POOL_SIZE])
+#define GET_READY_INDEX  _IOR('F', 5, int)
+#define RELEASE_BUF      _IOR('F', 6, int)
+#define GET_READY_COUNT  _IOR('F', 7, int)
 
-// #define SET_LOOPBACK _IOW('F', 2, int) // 如果需要，在驱动中实现
-#define CAN_FRAME_SIZE sizeof(struct can_frame)  // 根据实际结构体大小调整
-
-// CAN帧结构体定义（应与内核一致）
-struct can_frame {
-    unsigned int can_id;
-    unsigned char can_dlc;
-    unsigned char data[8];
-};
-
-// 时间戳宏
-#define TIMESTAMP_SIZE sizeof(uint64_t)
-
-int main(int argc, char *argv[]) {
-
-    int dev_fd = open("/dev/flexcan_dma", O_RDWR);
-    int rx_fd, index,i;
+// 处理CAN帧的函数
+void process_can_frame(struct can_frame *frame) {
+    printf("Received CAN frame: ID=0x%X, DLC=%d, Data=", 
+           frame->can_id & CAN_EFF_MASK, 
+           frame->can_dlc);
     
-    while (1) {
-        // 获取接收缓冲区
-        ioctl(dev_fd, GET_RX_BUF, &rx_fd);
-        
-        // 映射DMA缓冲区
-        struct can_frame *frame = mmap(NULL, CAN_FRAME_SIZE, 
-                                     PROT_READ, MAP_SHARED, rx_fd, 0);
-        
-        // 处理数据
-        printf("Received CAN ID: 0x%X\n", frame->can_id);
-        for (i = 0; i < frame->can_dlc; i++) {
-            printf("%02X ", frame->data[i]);
-        }
-        printf("\n");
-        
-        // 释放资源
-        munmap(frame, CAN_FRAME_SIZE);
-        
-        // 通知内核缓冲区释放
-        ioctl(dev_fd, GET_RX_DONE, &index);
-
-        close(rx_fd);
-
+    int i;
+    for (i = 0; i < frame->can_dlc; i++) {
+        printf("%02X ", frame->data[i]);
     }
-    
+    printf("\n");
+}
+
+int main() {
+    int dev_fd = open("/dev/flexcan_dma", O_RDWR);
+    if (dev_fd < 0) {
+        perror("打开设备失败");
+        return 1;
+    }
+
+    // 1. 获取所有RX缓冲区的fd
+    int rx_fds[DMA_POOL_SIZE];
+    if (ioctl(dev_fd, GET_ALL_RX_BUFS, rx_fds) < 0) {
+        perror("获取RX缓冲区失败");
+        close(dev_fd);
+        return 1;
+    }
+
+    // 2. 预映射所有缓冲区
+    void *rx_buffers[DMA_POOL_SIZE];
+    int i;
+    for (i = 0; i < DMA_POOL_SIZE; i++) {
+        rx_buffers[i] = mmap(NULL, sizeof(struct can_frame), PROT_READ, 
+                            MAP_SHARED, rx_fds[i], 0);
+        close(rx_fds[i]); // 映射后即可关闭fd
+        
+        if (rx_buffers[i] == MAP_FAILED) {
+            perror("mmap失败");
+            // 清理已映射的缓冲区
+            int j;
+            for (j = 0; j < i; j++) munmap(rx_buffers[j], sizeof(struct can_frame));
+            close(dev_fd);
+            return 1;
+        }
+    }
+
+    struct pollfd fds = {
+        .fd = dev_fd,
+        .events = POLLIN
+    };
+
+    while (1) {
+        // 3. 使用poll等待数据
+        int ret = poll(&fds, 1, -1);
+        if (ret < 0) {
+            perror("poll错误");
+            break;
+        }
+
+        if (fds.revents & POLLIN) {
+            // 4. 获取就绪缓冲区数量
+            int ready_count;
+            if (ioctl(dev_fd, GET_READY_COUNT, &ready_count) < 0) {
+                perror("获取就绪数量失败");
+                continue;
+            }
+            
+            printf("有 %d 个就绪帧\n", ready_count);
+            int i;
+            // 5. 批量处理所有就绪缓冲区
+            for (i = 0; i < ready_count; i++) {
+                int idx;
+                if (ioctl(dev_fd, GET_READY_INDEX, &idx) < 0) {
+                    perror("获取就绪索引失败");
+                    continue;
+                }
+                
+                // 6. 直接访问预映射的内存
+                struct can_frame *frame = (struct can_frame *)rx_buffers[idx];
+                process_can_frame(frame);
+                
+                // 7. 释放缓冲区
+                if (ioctl(dev_fd, RELEASE_BUF, &idx) < 0) {
+                    perror("释放缓冲区失败");
+                    printf("失败索引: %d\n", idx);
+                } else {
+                    printf("成功释放缓冲区: %d\n", idx);
+                }
+            }
+        }
+    }
+
+    // 清理
+    for (i = 0; i < DMA_POOL_SIZE; i++) {
+        munmap(rx_buffers[i], sizeof(struct can_frame));
+    }
     close(dev_fd);
     return 0;
-
 }
