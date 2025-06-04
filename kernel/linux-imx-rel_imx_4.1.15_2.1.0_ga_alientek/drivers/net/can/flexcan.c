@@ -407,20 +407,16 @@ EXPORT_SYMBOL(flexcan_dma_unregister_ops);
 
 int flexcan_hw_xmit(struct net_device *dev, dma_addr_t dma_addr, void *vaddr)
 {
-    /* 获取设备私有数据 */
-    const struct flexcan_priv *priv = netdev_priv(dev);
+    struct flexcan_priv *priv = netdev_priv(dev);
     struct flexcan_regs __iomem *regs = priv->base;
-    u32 can_id, ctrl;
+    struct can_frame *cf = vaddr;
+    u32 can_id;
+    u32 ctrl = FLEXCAN_MB_CNT_CODE(0xc) | (cf->can_dlc << 16);
 
-	struct can_frame *cf = vaddr;
     /* 参数有效性检查 */
     if (!cf || !priv || !regs)
         return -EINVAL;
 
-    /* 初始化控制寄存器值 */
-    ctrl = FLEXCAN_MB_CNT_CODE(0xc) | (cf->can_dlc << 16);
-
-    /* 配置CAN ID */
     if (cf->can_id & CAN_EFF_FLAG) {
         can_id = cf->can_id & CAN_EFF_MASK;
         ctrl |= FLEXCAN_MB_CNT_IDE | FLEXCAN_MB_CNT_SRR;
@@ -428,14 +424,18 @@ int flexcan_hw_xmit(struct net_device *dev, dma_addr_t dma_addr, void *vaddr)
         can_id = (cf->can_id & CAN_SFF_MASK) << 18;
     }
 
-    /* 处理远程帧 */
     if (cf->can_id & CAN_RTR_FLAG)
         ctrl |= FLEXCAN_MB_CNT_RTR;
 
-    /* 关键修改：使用DMA地址配置硬件 */
-    flexcan_write(lower_32_bits(dma_addr), &regs->cantxfg[FLEXCAN_TX_BUF_ID].data[0]);
-    flexcan_write(upper_32_bits(dma_addr), &regs->cantxfg[FLEXCAN_TX_BUF_ID].data[1]);
-
+    /* 写入数据到邮箱 */
+    if (cf->can_dlc > 0) {
+        u32 data = be32_to_cpup((__be32 *)&cf->data[0]);
+        flexcan_write(data, &regs->cantxfg[FLEXCAN_TX_BUF_ID].data[0]);
+    }
+    if (cf->can_dlc > 3) {
+        u32 data = be32_to_cpup((__be32 *)&cf->data[4]);
+        flexcan_write(data, &regs->cantxfg[FLEXCAN_TX_BUF_ID].data[1]);
+    }
 
     /* 配置邮箱 */
     flexcan_write(can_id, &regs->cantxfg[FLEXCAN_TX_BUF_ID].can_id);
@@ -443,11 +443,14 @@ int flexcan_hw_xmit(struct net_device *dev, dma_addr_t dma_addr, void *vaddr)
 
     /* ERR005829 errata处理 */
     flexcan_write(FLEXCAN_MB_CODE_TX_INACTIVE,
-            &regs->cantxfg[FLEXCAN_TX_BUF_RESERVED].can_ctrl);
+                 &regs->cantxfg[FLEXCAN_TX_BUF_RESERVED].can_ctrl);
     flexcan_write(FLEXCAN_MB_CODE_TX_INACTIVE,
-            &regs->cantxfg[FLEXCAN_TX_BUF_RESERVED].can_ctrl);
+                 &regs->cantxfg[FLEXCAN_TX_BUF_RESERVED].can_ctrl);
 
-    return 0; /* 返回0表示成功 */
+    /* 打印调试信息 */
+    printk( "TX Frame: ID=0x%X, DLC=%d\n", cf->can_id, cf->can_dlc);
+    
+    return 0;
 }
 EXPORT_SYMBOL(flexcan_hw_xmit);
 
@@ -1397,7 +1400,6 @@ static int flexcan_probe(struct platform_device *pdev)
 	int err, irq;
 	u32 clock_freq = 0;
 	int wakeup = 1;
-
 
 	reg_xceiver = devm_regulator_get(&pdev->dev, "xceiver");
 	if (PTR_ERR(reg_xceiver) == -EPROBE_DEFER)

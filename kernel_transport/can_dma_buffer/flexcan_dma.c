@@ -183,8 +183,8 @@ static const struct dma_buf_ops flexcan_dmabuf_ops = {
 
 /* 字符设备操作 */
 
-#define GET_TX_BUF       _IOR('F', 0, int)
-#define GET_TX_DONE      _IOR('F', 2, int)
+#define GET_TX_BUF_INDEX       _IOR('F', 0, int)
+#define GET_ALL_TX_BUFS   _IOR('F', 2, int)
 
 // 新增高效命令
 #define GET_ALL_RX_BUFS  _IOR('F', 4, int[DMA_POOL_SIZE]) // 获取所有RX缓冲区的fd
@@ -351,12 +351,28 @@ static long flexcan_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
             spin_unlock_irqrestore(&ring->rx_lock, flags);
             break;
 
+        
+
+
+        case GET_ALL_TX_BUFS:
+            for (i = 0; i < DMA_POOL_SIZE; i++) {
+                get_dma_buf(ring->tx_bufs[i].dma_buf);
+                fds[i] = dma_buf_fd(ring->tx_bufs[i].dma_buf, O_CLOEXEC);
+                if (fds[i] < 0) {
+                    while (--i >= 0) dma_buf_put(ring->tx_bufs[i].dma_buf);
+                    return fds[i];
+                }
+            }
             
-        case GET_TX_BUF:
+            if (copy_to_user((void __user *)arg, fds, sizeof(fds))) {
+                for (i = 0; i < DMA_POOL_SIZE; i++) dma_buf_put(ring->tx_bufs[i].dma_buf);
+                return -EFAULT;
+            }
+            break;
+
+        case GET_TX_BUF_INDEX:
             idx = atomic_inc_return(&ring->tx_prod) % DMA_POOL_SIZE;
-            get_dma_buf(ring->tx_bufs[idx].dma_buf); // 增加引用计数
-            ret = dma_buf_fd(ring->tx_bufs[idx].dma_buf, O_CLOEXEC);
-            put_user(ret, uarg);
+            put_user(idx, uarg);
             break;
         
     default:
@@ -369,23 +385,16 @@ static ssize_t flexcan_dma_write(struct file *filp, const char __user *buf,
                                     size_t count, loff_t *ppos)
 {
     struct flexcan_dma_ring *ring = filp->private_data;
-    int tx_fd;
-    int i; // 将循环变量移到函数开头
-
-    if(copy_from_user(&tx_fd, buf, sizeof(tx_fd))){
+    int index;
+    if (copy_from_user(&index, buf, sizeof(index)))
         return -EFAULT;
-    }
+    
+    if (index < 0 || index >= DMA_POOL_SIZE)
+        return -EINVAL;
 
-    for (i = 0; i < DMA_POOL_SIZE; i++){
-        struct file *buf_file = ring->tx_bufs[i].dma_buf->file;
-        if (buf_file && file_count(buf_file) && 
-            buf_file->f_inode->i_ino == fget(tx_fd)->f_inode->i_ino) {
-            atomic_set(&ring->tx_bufs[i].status, FRAME_READY);
-            schedule_delayed_work(&ring->tx_work, 0);
-            return sizeof(tx_fd);
-        }
-    }
-    return -EINVAL;
+    atomic_set(&ring->tx_bufs[index].status, FRAME_READY);
+    schedule_delayed_work(&ring->tx_work, 0);
+    return sizeof(index);
 }
 
 static unsigned int flexcan_dma_poll(struct file *filp, poll_table *wait)
@@ -501,34 +510,43 @@ static void process_tx_work(struct work_struct *work)
     struct flexcan_dma_ring *ring = container_of(work, struct flexcan_dma_ring, tx_work.work);
     unsigned long flags;
     u32 cons, prod;
-
+    int processed = 0;
+    const int max_batch = 16; // 增加批量大小
+    
     spin_lock_irqsave(&ring->tx_lock, flags);
     cons = atomic_read(&ring->tx_cons);
     prod = atomic_read(&ring->tx_prod);
-
-    while (cons != prod) {
+    
+    while (processed < max_batch && CIRC_CNT(prod, cons, DMA_POOL_SIZE) > 0) {
         int idx = cons % DMA_POOL_SIZE;
         struct can_dma_buf *buf = &ring->tx_bufs[idx];
-
-        if (atomic_cmpxchg(&buf->status, FRAME_READY, FRAME_IN_USE) == FRAME_READY) {
-
-            dma_sync_single_for_device(ring->dev, buf->dma_handle,
-                              CAN_FRAME_SIZE, DMA_TO_DEVICE);
-            // 触发硬件传输
-            flexcan_hw_xmit(ring->ndev, buf->dma_handle, buf->vaddr);
-
-            atomic_set(&buf->status, FRAME_SENT);
-            cons++;  
+        
+        // 确保状态正确
+        if (atomic_read(&buf->status) != FRAME_READY) {
+            // 跳过无效缓冲区
+            cons = (cons + 1) % (2 * DMA_POOL_SIZE);
             atomic_set(&ring->tx_cons, cons);
-        } else {
-            break;
+            continue;
         }
+        
+        // 标记为正在发送
+        atomic_set(&buf->status, FRAME_IN_USE);
+        
+        // 实际发送
+        if (flexcan_hw_xmit(ring->ndev, buf->dma_handle, buf->vaddr) == 0) {
+            processed++;
+        }
+        
+        cons = (cons + 1) % (2 * DMA_POOL_SIZE);
+        atomic_set(&ring->tx_cons, cons);
     }
-
+    
     spin_unlock_irqrestore(&ring->tx_lock, flags);
-
-    if (cons != prod)
+    
+    // 如果还有待发送帧，立即重新调度
+    if (CIRC_CNT(prod, cons, DMA_POOL_SIZE) > 0) {
         schedule_delayed_work(&ring->tx_work, 0);
+    }
 }
 
 static struct can_frame* get_dma_frame(int *index) {
@@ -619,32 +637,28 @@ static void frame_timeout_handler(unsigned long data)
 {
     struct flexcan_dma_ring *ring = (struct flexcan_dma_ring *)data;
     unsigned long flags;
-    int idx, count = 0;
+    int idx;
+    u32 tail;
 
     spin_lock_irqsave(&ring->rx_lock, flags);
-        
-    // 遍历所有缓冲区
+    tail = atomic_read(&ring->rx_tail);
+    
     for (idx = 0; idx < DMA_POOL_SIZE; idx++) {
-        if (atomic_read(&ring->rx_bufs[idx].status) == FRAME_PENDING || 
-            atomic_read(&ring->rx_bufs[idx].status) == FRAME_READY) {
-            // 检查是否超时
-            if (time_after(jiffies, ring->rx_bufs[idx].timestamp + HZ)) {
-                // 重置缓冲区状态
+        // 只处理长时间未取走的READY缓冲区
+        if (atomic_read(&ring->rx_bufs[idx].status) == FRAME_READY &&
+            time_after(jiffies, ring->rx_bufs[idx].timestamp + 5 * HZ)) {
+                
+            // 确保在环形缓冲区中
+            if (idx == (tail % DMA_POOL_SIZE)) {
                 atomic_set(&ring->rx_bufs[idx].status, FRAME_FREE);
-                count++;
-                pr_warn("Timeout reset buffer %d\n", idx);
+                atomic_set(&ring->rx_tail, (tail + 1) % (2 * DMA_POOL_SIZE));
+                tail = atomic_read(&ring->rx_tail);
+                pr_warn("Timeout release buffer %d\n", idx);
             }
         }
     }
-    
     spin_unlock_irqrestore(&ring->rx_lock, flags);
-    
-    if (count > 0) {
-        pr_warn("Reset %d timed out buffers\n", count);
-    }
-    
-    // 重新设置定时器
-    mod_timer(&ring->timeout_timer, jiffies + HZ);
+    mod_timer(&ring->timeout_timer, jiffies + 5 * HZ);
 }
 
 static int __init flexcan_dma_init(void)

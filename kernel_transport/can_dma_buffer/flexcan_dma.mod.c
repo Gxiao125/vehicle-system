@@ -44,7 +44,6 @@ __attribute__((section("__versions"))) = {
 	{ 0x6fdf3bfa, __VMLINUX_SYMBOL_STR(flexcan_hw_xmit) },
 	{ 0x2d3385d3, __VMLINUX_SYMBOL_STR(system_wq) },
 	{ 0x9963a089, __VMLINUX_SYMBOL_STR(queue_delayed_work_on) },
-	{ 0x50d8ff4c, __VMLINUX_SYMBOL_STR(fget) },
 	{ 0x208614a6, __VMLINUX_SYMBOL_STR(kmalloc_caches) },
 	{ 0xa59a219f, __VMLINUX_SYMBOL_STR(dma_common_get_sgtable) },
 	{ 0xcca6874c, __VMLINUX_SYMBOL_STR(kmem_cache_alloc) },
@@ -61,9 +60,9 @@ __attribute__((section("__versions"))) = {
 	{ 0x1000e51, __VMLINUX_SYMBOL_STR(schedule) },
 	{ 0x499cb58c, __VMLINUX_SYMBOL_STR(prepare_to_wait) },
 	{ 0xfbc74f64, __VMLINUX_SYMBOL_STR(__copy_from_user) },
+	{ 0xbc10dd97, __VMLINUX_SYMBOL_STR(__put_user_4) },
 	{ 0x37ae6cb9, __VMLINUX_SYMBOL_STR(dma_buf_put) },
 	{ 0x31be471a, __VMLINUX_SYMBOL_STR(dma_buf_fd) },
-	{ 0xbc10dd97, __VMLINUX_SYMBOL_STR(__put_user_4) },
 	{ 0xd007beca, __VMLINUX_SYMBOL_STR(arm_dma_ops) },
 	{ 0xd85cd67e, __VMLINUX_SYMBOL_STR(__wake_up) },
 	{ 0x7d11c268, __VMLINUX_SYMBOL_STR(jiffies) },
@@ -80,4 +79,4 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "19A881D4698425812CF4AEB");
+MODULE_INFO(srcversion, "31C0CA256234785937F0F52");

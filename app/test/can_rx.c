@@ -4,7 +4,7 @@
 #include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <poll.h>
-#include <linux/can.h>  // 添加 CAN 帧定义头文件
+#include <linux/can.h>
 
 #define DMA_POOL_SIZE 64
 #define GET_ALL_RX_BUFS  _IOR('F', 4, int[DMA_POOL_SIZE])
@@ -26,6 +26,7 @@ void process_can_frame(struct can_frame *frame) {
 }
 
 int main() {
+
     int dev_fd = open("/dev/flexcan_dma", O_RDWR);
     if (dev_fd < 0) {
         perror("打开设备失败");
@@ -79,26 +80,28 @@ int main() {
                 continue;
             }
             
-            printf("有 %d 个就绪帧\n", ready_count);
-            int i;
-            // 5. 批量处理所有就绪缓冲区
-            for (i = 0; i < ready_count; i++) {
-                int idx;
-                if (ioctl(dev_fd, GET_READY_INDEX, &idx) < 0) {
-                    perror("获取就绪索引失败");
-                    continue;
-                }
-                
-                // 6. 直接访问预映射的内存
-                struct can_frame *frame = (struct can_frame *)rx_buffers[idx];
-                process_can_frame(frame);
-                
-                // 7. 释放缓冲区
-                if (ioctl(dev_fd, RELEASE_BUF, &idx) < 0) {
-                    perror("释放缓冲区失败");
-                    printf("失败索引: %d\n", idx);
-                } else {
-                    printf("成功释放缓冲区: %d\n", idx);
+            if (ready_count > 0) {
+                    printf("有 %d 个就绪帧\n", ready_count);
+                int i;
+                // 5. 批量处理所有就绪缓冲区
+                for (i = 0; i < ready_count; i++) {
+                    int idx;
+                    if (ioctl(dev_fd, GET_READY_INDEX, &idx) < 0) {
+                        perror("获取就绪索引失败");
+                        continue;
+                    }
+                    
+                    // 6. 直接访问预映射的内存
+                    struct can_frame *frame = (struct can_frame *)rx_buffers[idx];
+                    process_can_frame(frame);
+                    
+                    // 7. 释放缓冲区
+                    if (ioctl(dev_fd, RELEASE_BUF, &idx) < 0) {
+                        perror("释放缓冲区失败");
+                        printf("失败索引: %d\n", idx);
+                    } else {
+                        printf("成功释放缓冲区: %d\n", idx);
+                    }
                 }
             }
         }
@@ -110,4 +113,5 @@ int main() {
     }
     close(dev_fd);
     return 0;
+
 }
