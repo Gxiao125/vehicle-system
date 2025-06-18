@@ -1,0 +1,43 @@
+[1;33mGenerating CMake toolchain file...[0m
+[0;32mToolchain file created: /home/xiao/project/vehicle-system/Middleware/toolchain.cmake[0m
+[1;33mBuilding Middleware application...[0m
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/xiao/project/vehicle-system/Middleware/build
+[ 14%] Built target SharedMemory
+[ 28%] Built target CanController
+[ 35%] Building CXX object CMakeFiles/TransportLayer.dir/can_server/TransportLayer.cpp.o
+[ 50%] Built target CanMessageParser
+[ 64%] Built target VehicleCommunicationAPI
+[ 71%] Linking CXX static library lib/libTransportLayer.a
+[ 71%] Built target TransportLayer
+[ 78%] Building CXX object CMakeFiles/CANService.dir/can_server/CANService.cpp.o
+[ 85%] Linking CXX static library lib/libCANService.a
+[ 85%] Built target CANService
+[ 92%] Building CXX object CMakeFiles/can_service.dir/server_main/can_service_main.cpp.o
+[100%] Linking CXX executable bin/can_service
+[100%] Built target can_service
+[ 14%] Built target SharedMemory
+[ 28%] Built target CanMessageParser
+[ 42%] Built target CanController
+[ 57%] Built target TransportLayer
+[ 71%] Built target CANService
+[ 85%] Built target VehicleCommunicationAPI
+[100%] Built target can_service
+Install the project...
+-- Install configuration: "Release"
+-- Installing: /home/xiao/project/vehicle-system/output/middleware/lib/libSharedMemory.a
+-- Installing: /home/xiao/project/vehicle-system/output/middleware/lib/libCanMessageParser.a
+-- Installing: /home/xiao/project/vehicle-system/output/middleware/lib/libCanController.a
+-- Installing: /home/xiao/project/vehicle-system/output/middleware/lib/libTransportLayer.a
+-- Installing: /home/xiao/project/vehicle-system/output/middleware/lib/libCANService.a
+-- Installing: /home/xiao/project/vehicle-system/output/middleware/lib/libVehicleCommunicationAPI.a
+-- Installing: /home/xiao/project/vehicle-system/output/middleware/bin/can_service
+-- Installing: /home/xiao/project/vehicle-system/output/middleware/include
+-- Installing: /home/xiao/project/vehicle-system/output/middleware/include/CanController.h
+-- Installing: /home/xiao/project/vehicle-system/output/middleware/include/CanMessageParser.h
+-- Installing: /home/xiao/project/vehicle-system/output/middleware/include/VehicleCommunicationAPI.h
+-- Installing: /home/xiao/project/vehicle-system/output/middleware/include/CANService.h
+-- Installing: /home/xiao/project/vehicle-system/output/middleware/include/SharedMemoryPool.h
+-- Installing: /home/xiao/project/vehicle-system/output/middleware/include/TransportLayer.h
+[0;32mMiddleware build completed.[0m

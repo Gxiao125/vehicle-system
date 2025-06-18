@@ -38,7 +38,7 @@ __attribute__((section("__versions"))) = {
 	{ 0x29537c9e, __VMLINUX_SYMBOL_STR(alloc_chrdev_region) },
 	{ 0xfa2bcf10, __VMLINUX_SYMBOL_STR(init_timer_key) },
 	{ 0x275ef902, __VMLINUX_SYMBOL_STR(__init_waitqueue_head) },
-	{ 0x5d6414ab, __VMLINUX_SYMBOL_STR(flexcan_dma_register_ops) },
+	{ 0xe1422dc2, __VMLINUX_SYMBOL_STR(flexcan_dma_register_ops) },
 	{ 0x67921cca, __VMLINUX_SYMBOL_STR(dev_get_by_name) },
 	{ 0x72350130, __VMLINUX_SYMBOL_STR(___ratelimit) },
 	{ 0x6fdf3bfa, __VMLINUX_SYMBOL_STR(flexcan_hw_xmit) },
@@ -79,4 +79,4 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "31C0CA256234785937F0F52");
+MODULE_INFO(srcversion, "5230CE7B02889B372F8F69D");

@@ -1,0 +1,13 @@
+/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles/SharedMemory.dir
+/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles/CanMessageParser.dir
+/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles/CanController.dir
+/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles/TransportLayer.dir
+/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles/CANService.dir
+/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles/VehicleCommunicationAPI.dir
+/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles/can_service.dir
+/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles/edit_cache.dir
+/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles/rebuild_cache.dir
+/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles/list_install_components.dir
+/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles/install.dir
+/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles/install/local.dir
+/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles/install/strip.dir

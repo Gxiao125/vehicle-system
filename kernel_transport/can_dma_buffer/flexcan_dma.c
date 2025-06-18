@@ -18,14 +18,14 @@ struct can_dma_buf {
     struct dma_buf *dma_buf;
     dma_addr_t dma_handle;
     void *vaddr;
-    atomic_t status;
+    atomic_t status;       
     struct device *dev;
-    struct flexcan_dma_ring *ring;  // 添加ring指针
-    int index;                      // 添加索引
-    unsigned long timestamp;        // 添加时间戳
+    struct flexcan_dma_ring *ring;  
+    int index;                      
+    unsigned long timestamp;    //时间戳，记录超时未处理的报文    
 };
 
-// 添加timeout_timer成员
+
 struct flexcan_dma_ring {
     struct net_device *ndev;
     struct device *dev;
@@ -49,6 +49,9 @@ struct flexcan_dma_ring {
 
 static struct class *class;
 static struct flexcan_dma_ring *dma_ring;
+
+static int dma_buff_is_ready = 0;
+
 
 /* DMA-BUF 操作回调 */
 static struct sg_table* flexcan_dmabuf_map(
@@ -248,7 +251,7 @@ static long flexcan_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 
                 if (avail > 0) {
                     // 找到下一个就绪缓冲区
-                    int idx = tail % DMA_POOL_SIZE;  // 使用标准取模
+                    int idx = tail % DMA_POOL_SIZE;  
                     
                     pr_debug("Checking buffer %d (status=%d)\n", 
                             idx, atomic_read(&ring->rx_bufs[idx].status));
@@ -258,7 +261,7 @@ static long flexcan_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
                         found = idx;
                         atomic_set(&ring->rx_bufs[idx].status, FRAME_IN_USE);
                         
-                        // 更新 tail 指针（标准递增和取模）
+                        // 更新 tail 指针
                         atomic_set(&ring->rx_tail, (tail + 1) % (2 * DMA_POOL_SIZE));
                         
                         pr_debug("Found buffer %d, new tail=%u\n", 
@@ -349,11 +352,10 @@ static long flexcan_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
             wake_up_interruptible(&ring->rx_wq);
             
             spin_unlock_irqrestore(&ring->rx_lock, flags);
+
             break;
 
-        
-
-
+    
         case GET_ALL_TX_BUFS:
             for (i = 0; i < DMA_POOL_SIZE; i++) {
                 get_dma_buf(ring->tx_bufs[i].dma_buf);
@@ -549,6 +551,7 @@ static void process_tx_work(struct work_struct *work)
     }
 }
 
+
 static struct can_frame* get_dma_frame(int *index) {
     struct flexcan_dma_ring *ring = dma_ring;
     unsigned long flags;
@@ -584,7 +587,7 @@ static struct can_frame* get_dma_frame(int *index) {
     }
     
     // 计算缓冲区索引
-    idx = head % DMA_POOL_SIZE;  // 使用标准取模运算
+    idx = head % DMA_POOL_SIZE; 
     
     // 确保缓冲区空闲
     if (atomic_read(&ring->rx_bufs[idx].status) != FRAME_FREE) {
@@ -597,7 +600,7 @@ static struct can_frame* get_dma_frame(int *index) {
     // 成功获取缓冲区
     atomic_set(&ring->rx_bufs[idx].status, FRAME_PENDING);
     
-    // 更新 head 指针（使用标准递增和取模）
+    // 更新 head 指针
     atomic_set(&ring->rx_head, (head + 1) % (2 * DMA_POOL_SIZE));
     
     ring->rx_bufs[idx].timestamp = jiffies;
@@ -661,6 +664,11 @@ static void frame_timeout_handler(unsigned long data)
     mod_timer(&ring->timeout_timer, jiffies + 5 * HZ);
 }
 
+int is_dma_buff_ready(void) 
+{
+    return dma_buff_is_ready;
+};
+
 static int __init flexcan_dma_init(void)
 {
     int ret;
@@ -672,6 +680,7 @@ static int __init flexcan_dma_init(void)
     static struct flexcan_dma_ops ops = {
         .get_frame = get_dma_frame,
         .rx_data_complete = rx_data_complete,
+        .is_dma_buff_ready = is_dma_buff_ready,
     };
     flexcan_dma_register_ops(&ops);
 
@@ -712,6 +721,7 @@ static int __init flexcan_dma_init(void)
     dma_ring->timeout_timer.function = frame_timeout_handler;
     dma_ring->timeout_timer.data = (unsigned long)dma_ring;
     mod_timer(&dma_ring->timeout_timer, jiffies + HZ);
+    dma_buff_is_ready = 1;
 
     // 注册字符设备
     ret = alloc_chrdev_region(&dma_ring->devno, 0, 1, "flexcan_dma");
@@ -737,8 +747,10 @@ static int __init flexcan_dma_init(void)
 // 错误处理
 err_del_cdev:
     cdev_del(&dma_ring->cdev);
+
 err_unreg:
     unregister_chrdev_region(dma_ring->devno, 1);
+
 err_free_rx:
     for (i = 0; i < DMA_POOL_SIZE; i++) {
         dma_buf_put(dma_ring->rx_bufs[i].dma_buf);
@@ -755,6 +767,7 @@ err_free_tx:
     }
 err_put_dev:
     dev_put(net_dev);
+    
 err_free:
     kfree(dma_ring);
     return ret;
@@ -787,6 +800,9 @@ static void __exit flexcan_dma_exit(void)
                          dma_ring->rx_bufs[i].vaddr,
                          dma_ring->rx_bufs[i].dma_handle);
     }
+
+    dma_buff_is_ready = 0;
+
 
     kfree(dma_ring);
 }

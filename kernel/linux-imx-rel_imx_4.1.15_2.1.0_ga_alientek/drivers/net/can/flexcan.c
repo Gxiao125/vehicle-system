@@ -779,7 +779,6 @@ static void flexcan_read_fifo(const struct net_device *dev,
 	flexcan_read(&regs->timer);
 }
 
-#if 0
 static int flexcan_read_frame(struct net_device *dev)
 {
 	struct net_device_stats *stats = &dev->stats;
@@ -803,7 +802,6 @@ static int flexcan_read_frame(struct net_device *dev)
 
 	return 1;
 }
-#else
 
 static int flexcan_dma_read_frame(struct net_device *dev)
 {
@@ -847,7 +845,6 @@ static int flexcan_dma_read_frame(struct net_device *dev)
 
     return 1;
 }
-#endif
 
 static int flexcan_poll(struct napi_struct *napi, int quota)
 {
@@ -870,11 +867,11 @@ static int flexcan_poll(struct napi_struct *napi, int quota)
 	reg_iflag1 = flexcan_read(&regs->iflag1);
 	while (reg_iflag1 & FLEXCAN_IFLAG_RX_FIFO_AVAILABLE &&
 	       work_done < quota) {
-	#if 0
+	if (!dma_ops->is_dma_buff_ready() ||  !dma_ops->is_dma_buff_ready)
 		work_done += flexcan_read_frame(dev);
-	#else
+	else
 		work_done += flexcan_dma_read_frame(dev);
-	#endif
+
 		reg_iflag1 = flexcan_read(&regs->iflag1);
 	}
 

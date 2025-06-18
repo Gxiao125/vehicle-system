@@ -22,6 +22,7 @@
 struct flexcan_dma_ops {
     struct can_frame* (*get_frame)(int *index);
     void (*rx_data_complete)(int index);
+    int (*is_dma_buff_ready)(void);
 };
 
 extern int flexcan_dma_register_ops(const struct flexcan_dma_ops *ops);

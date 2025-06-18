@@ -52,6 +52,10 @@ clean() {
         rm -rf "$OUTPUT_DIR" || true
         make -C "$PROJECT_ROOT/board/imx6ull-mini/uboot-imx-rel_imx_4.1.15_2.1.0_ga_alientek" distclean
         make -C "$PROJECT_ROOT/kernel/linux-imx-rel_imx_4.1.15_2.1.0_ga_alientek" distclean
+        # 清理驱动模块
+        make -C "$PROJECT_ROOT/kernel_transport/can_dma_buffer" clean || true
+        # 清理Middleware构建
+        rm -rf "$PROJECT_ROOT/Middleware/build" || true
     } > /dev/null 2>&1
     color_echo "${GREEN}" "Clean completed."
 }
@@ -109,29 +113,75 @@ build_kernel() {
     color_echo "${GREEN}" "Kernel build completed."
 }
 
-# 编译外部驱动模块
-# build_drivers() {
+# 编译can_dma_buffer驱动模块
+build_drivers() {
+    color_echo "${YELLOW}" "Building CAN DMA Buffer driver..."
+    local driver_dir="$PROJECT_ROOT/kernel_transport/can_dma_buffer"
+    local kernel_build_dir="$PROJECT_ROOT/kernel/linux-imx-rel_imx_4.1.15_2.1.0_ga_alientek"
+    local output_dir="$OUTPUT_DIR/drivers"
+    
+    pushd "$driver_dir" >/dev/null
+    
+    # 使用内核构建系统编译外部模块
+    make -C "$kernel_build_dir" M=$(pwd) modules || error_exit "Driver build failed"
+    
+    mkdir -p "$output_dir"
+    cp *.ko "$output_dir/"
+    check_build "Driver" "$output_dir/flexcan_dma.ko"
+    popd >/dev/null
+    
+    color_echo "${GREEN}" "Driver build completed."
+}
 
-        
-# }
+# 编译Middleware应用
+build_middleware() {
+    color_echo "${YELLOW}" "Building Middleware application..."
+    local middleware_dir="$PROJECT_ROOT/Middleware"
+    local build_dir="$middleware_dir/build"
+    local output_dir="$OUTPUT_DIR/middleware"
+    
+    # 创建构建目录
+    mkdir -p "$build_dir"
+    pushd "$build_dir" >/dev/null
+    
+    # 配置交叉编译环境
+    cmake -DCMAKE_TOOLCHAIN_FILE=../toolchain.cmake \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_INSTALL_PREFIX="$output_dir" \
+          .. || error_exit "CMake configuration failed"
+    
+    # 编译并安装
+    make -j$(nproc) || error_exit "Middleware build failed"
+    make install || error_exit "Middleware install failed"
+    
+    check_build "Middleware" "$output_dir/bin/can_service"
+    popd >/dev/null
+    
+    color_echo "${GREEN}" "Middleware build completed."
+}
 
-# 同步根文件系统
-# sync_rootfs() {
-    # color_echo "${YELLOW}" "Preparing root filesystem..."
-#     local rootfs_src="$PROJECT_ROOT/rootfs"
-#     local rootfs_dest="$OUTPUT_DIR/rootfs"
+# 生成交叉编译工具链文件
+generate_toolchain_file() {
+    color_echo "${YELLOW}" "Generating CMake toolchain file..."
+    local middleware_dir="$PROJECT_ROOT/Middleware"
+    local toolchain_file="$middleware_dir/toolchain.cmake"
     
-#     [ -d "$rootfs_src" ] || error_exit "RootFS source directory not found"
+    # 创建工具链文件
+    cat << EOF > "$toolchain_file"
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR arm)
+
+set(CMAKE_C_COMPILER ${CROSS_COMPILE}gcc)
+set(CMAKE_CXX_COMPILER ${CROSS_COMPILE}g++)
+
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+EOF
     
-#     rsync -aq --delete "$rootfs_src/" "$rootfs_dest/"
-    
-#     # 部署内核模块
-#     if [ -d "$OUTPUT_DIR/modules" ]; then
-#         rsync -a "$OUTPUT_DIR/modules/lib/" "$rootfs_dest/"
-#     fi
-    
-#     color_echo "${GREEN}" "RootFS prepared: $rootfs_dest"
-# }
+    color_echo "${GREEN}" "Toolchain file created: $toolchain_file"
+}
 
 # 显示构建报告
 show_report() {
@@ -140,7 +190,8 @@ show_report() {
     echo "U-Boot:      $(md5sum $OUTPUT_DIR/uboot/u-boot.bin 2>/dev/null || echo 'N/A')"
     echo "Kernel:      $(md5sum $OUTPUT_DIR/kernel/zImage 2>/dev/null || echo 'N/A')"
     echo "DeviceTree:  $(ls $OUTPUT_DIR/kernel/*.dtb 2>/dev/null | wc -l) files"
-    echo "RootFS Size: $(du -sh $OUTPUT_DIR/rootfs 2>/dev/null || echo 'N/A')"
+    echo "Drivers:     $(ls $OUTPUT_DIR/drivers/*.ko 2>/dev/null | wc -l) modules"
+    echo "Middleware:  $(ls $OUTPUT_DIR/middleware/bin/* 2>/dev/null | wc -l) executables"
 }
 
 # 参数解析
@@ -157,11 +208,16 @@ parse_args() {
                 ;;
             -k|--kernel-only)
                 build_kernel
-                # build_drivers
+                build_drivers
                 exit 0
                 ;;
             -d|--drivers-only)
-                # build_drivers
+                build_drivers
+                exit 0
+                ;;
+            -m|--middleware-only)
+                generate_toolchain_file
+                build_middleware
                 exit 0
                 ;;
             -h|--help)
@@ -179,11 +235,12 @@ parse_args() {
 show_help() {
     echo "Usage: $0 [options]"
     echo "Options:"
-    echo "  -c, --clean        Clean build artifacts"
-    echo "  -u, --uboot-only   Build U-Boot only"
-    echo "  -k, --kernel-only  Build Kernel and modules"
-    echo "  -d, --drivers-only Build external drivers only"
-    echo "  -h, --help         Show this help"
+    echo "  -c, --clean           Clean build artifacts"
+    echo "  -u, --uboot-only      Build U-Boot only"
+    echo "  -k, --kernel-only     Build Kernel and modules"
+    echo "  -d, --drivers-only    Build external drivers only"
+    echo "  -m, --middleware-only Build Middleware application only"
+    echo "  -h, --help            Show this help"
 }
 
 # 主流程
@@ -194,6 +251,7 @@ main() {
     color_echo "${YELLOW}" "Starting build process..."
     mkdir -p "$OUTPUT_DIR"
 
+    # 创建符号链接（如果需要）
     mkdir -p "$PROJECT_ROOT/transport/include"
     mkdir -p "$PROJECT_ROOT/transport/driver_can"
 
@@ -202,8 +260,11 @@ main() {
 
     build_uboot
     build_kernel
-    # build_drivers
-    # sync_rootfs
+    build_drivers
+    
+    # 为Middleware生成交叉编译工具链文件并构建
+    generate_toolchain_file
+    build_middleware
     
     show_report
 }
