@@ -1,0 +1,32 @@
+[1;33mGenerating CMake toolchain file...[0m
+[0;32mToolchain file created: /home/xiao/project/vehicle-system/Middleware/toolchain.cmake[0m
+[1;33mBuilding Middleware application...[0m
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/xiao/project/vehicle-system/Middleware/build
+[ 25%] Built target SharedMemory
+[ 25%] Built target CanController
+[ 43%] Building CXX object CMakeFiles/CanMessageParser.dir/masage_parse/CanMessageParser.cpp.o
+[ 43%] Built target TransportLayer
+[ 56%] Built target CANService
+[ 68%] Built target can_service
+[ 75%] Linking CXX static library lib/libCanMessageParser.a
+[ 75%] Built target CanMessageParser
+[ 87%] Building CXX object CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.o
+[ 87%] Building CXX object CMakeFiles/VehicleCommunicationAPI.dir/api/VehicleCommunicationAPI.cpp.o
+/home/xiao/project/vehicle-system/Middleware/api/VehicleCommunicationAPI.cpp: In member function ‘void VehicleCommunicationAPI::loadMessageDefinitions(const string&)’:
+/home/xiao/project/vehicle-system/Middleware/api/VehicleCommunicationAPI.cpp:218:21: error: ‘struct CanMessageParser::SignalDefinition’ has no member named ‘unit’
+             sig_def.unit = unit;
+                     ^
+/home/xiao/project/vehicle-system/Middleware/api/VehicleCommunicationAPI.cpp: In member function ‘void VehicleCommunicationAPI::handleReceivedMessage(uint32_t, const std::vector<unsigned char>&)’:
+/home/xiao/project/vehicle-system/Middleware/api/VehicleCommunicationAPI.cpp:247:57: error: ‘const mapped_type’ has no member named ‘unit’
+                     unit = def->signals.at(signal_name).unit;
+                                                         ^
+/home/xiao/project/vehicle-system/Middleware/api/VehicleCommunicationAPI.cpp:250:55: error: ‘const struct CanMessageParser::SignalValue’ has no member named ‘asDouble’
+                 handler_it->second(signal_name, value.asDouble(), unit);
+                                                       ^
+make[2]: *** [CMakeFiles/VehicleCommunicationAPI.dir/build.make:76: CMakeFiles/VehicleCommunicationAPI.dir/api/VehicleCommunicationAPI.cpp.o] Error 1
+make[2]: *** Waiting for unfinished jobs....
+make[1]: *** [CMakeFiles/Makefile2:229: CMakeFiles/VehicleCommunicationAPI.dir/all] Error 2
+make: *** [Makefile:136: all] Error 2
+[0;31mError: Middleware build failed[0m

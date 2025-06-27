@@ -79,7 +79,6 @@ dashboard/CMakeFiles/dashboard.dir/dashboard.cpp.o: /home/xiao/project/vehicle-s
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/cerrno \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/chrono \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/clocale \
-  /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/cmath \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/cstdint \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/cstdio \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/cstdlib \
@@ -133,17 +132,9 @@ dashboard/CMakeFiles/dashboard.dir/dashboard.cpp.o: /home/xiao/project/vehicle-s
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/errno.h \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/fcntl-linux.h \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/fcntl.h \
-  /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/huge_val.h \
-  /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/huge_valf.h \
-  /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/huge_vall.h \
-  /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/inf.h \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/locale.h \
-  /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/mathcalls.h \
-  /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/mathdef.h \
-  /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/mathinline.h \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/mman-linux.h \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/mman.h \
-  /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/nan.h \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/posix_opt.h \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/pthreadtypes.h \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/sched.h \
@@ -176,7 +167,6 @@ dashboard/CMakeFiles/dashboard.dir/dashboard.cpp.o: /home/xiao/project/vehicle-s
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/libio.h \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/linux/errno.h \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/locale.h \
-  /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/math.h \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/pthread.h \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/sched.h \
   /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/stdc-predef.h \
@@ -258,6 +248,8 @@ dashboard/CMakeFiles/dashboard.dir/dashboard.cpp.o: /home/xiao/project/vehicle-s
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/stdio.h:
 
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/stat.h:
+
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/sigset.h:
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/stdio.h:
@@ -276,33 +268,17 @@ dashboard/CMakeFiles/dashboard.dir/dashboard.cpp.o: /home/xiao/project/vehicle-s
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/mman-linux.h:
 
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/mathinline.h:
-
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/mathcalls.h:
-
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/wctype.h:
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/waitflags.h:
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/locale.h:
 
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/inf.h:
-
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/huge_vall.h:
-
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/huge_valf.h:
-
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/stat.h:
-
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/huge_val.h:
-
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/fcntl.h:
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/errno.h:
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/errno.h:
-
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/endian.h:
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/stl_iterator.h:
 
@@ -335,8 +311,6 @@ dashboard/CMakeFiles/dashboard.dir/dashboard.cpp.o: /home/xiao/project/vehicle-s
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/fcntl.h:
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/concept_check.h:
-
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/mathdef.h:
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/parse_numbers.h:
 
@@ -462,8 +436,6 @@ dashboard/CMakeFiles/dashboard.dir/dashboard.cpp.o: /home/xiao/project/vehicle-s
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/exception_defines.h:
 
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/math.h:
-
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/stl_iterator_base_funcs.h:
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/typeinfo:
@@ -509,8 +481,6 @@ dashboard/CMakeFiles/dashboard.dir/dashboard.cpp.o: /home/xiao/project/vehicle-s
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/stl_raw_storage_iter.h:
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/clocale:
-
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/cmath:
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/fcntl-linux.h:
 
@@ -560,8 +530,6 @@ dashboard/CMakeFiles/dashboard.dir/dashboard.cpp.o: /home/xiao/project/vehicle-s
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/pthread.h:
 
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/nan.h:
-
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/mutex:
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/new:
@@ -586,15 +554,15 @@ dashboard/CMakeFiles/dashboard.dir/dashboard.cpp.o: /home/xiao/project/vehicle-s
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/streambuf:
 
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/alloca.h:
-
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/thread:
-
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/tuple:
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/asm-generic/errno-base.h:
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/_G_config.h:
+
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/thread:
+
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/alloca.h:
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/features.h:
 
@@ -605,3 +573,5 @@ dashboard/CMakeFiles/dashboard.dir/dashboard.cpp.o: /home/xiao/project/vehicle-s
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/locale_classes.tcc:
 
 /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/confname.h:
+
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/libc/usr/include/bits/endian.h:

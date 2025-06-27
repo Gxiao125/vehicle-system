@@ -92,8 +92,8 @@ int main() {
     while (true) {
         try {
             // 发送信号 - 使用 double 值
-            // api.sendSignal("DRIVER_DOOR", static_cast<double>(doorDist(gen)));
-            // api.sendSignal("PASSENGER_DOOR", static_cast<double>(doorDist(gen)));
+            api.sendSignal("DRIVER_DOOR", static_cast<double>(doorDist(gen)));
+            api.sendSignal("PASSENGER_DOOR", static_cast<double>(doorDist(gen)));
             
             std::this_thread::sleep_for(std::chrono::seconds(5));
         } catch (const std::exception& e) {
