@@ -91,7 +91,11 @@ target_link_libraries(CANService
 # 添加VehicleCommunicationAPI库
 add_library(VehicleCommunicationAPI STATIC
             api/VehicleCommunicationAPI.cpp
+            masage_parse/CanMessageParser.cpp
+            sharedMemory/SharedMemoryPool.cpp
             include/VehicleCommunicationAPI.h
+            include/CanMessageParser.h
+            include/SharedMemoryPool.h
 )
 
 # 链接CAN消息解析和共享内存库

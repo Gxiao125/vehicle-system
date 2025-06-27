@@ -1,0 +1,39 @@
+SharedMemoryPool created with channels: /can_shared_mem_recv and /can_shared_mem_send
+FlexCANController start success
+CANService started successfully.
+  Device: /dev/flexcan_dma
+Press Ctrl+C to stop...
+service start ..........!
+Received message: CAN ID=0x200, Length=8, Data: b0 00 00 00 00 00 00 00
+Received message: CAN ID=0x201, Length=8, Data: 51 4c 00 00 00 00 00 00
+Received message: CAN ID=0x202, Length=8, Data: 30 00 00 00 00 00 00 00
+Received message: CAN ID=0x200, Length=8, Data: c0 00 00 00 00 00 00 00
+Received message: CAN ID=0x201, Length=8, Data: 2a 27 00 00 00 00 00 00
+Received message: CAN ID=0x202, Length=8, Data: 50 00 00 00 00 00 00 00
+Received message: CAN ID=0x200, Length=8, Data: 70 00 00 00 00 00 00 00
+Received message: CAN ID=0x201, Length=8, Data: 16 22 00 00 00 00 00 00
+Received message: CAN ID=0x202, Length=8, Data: e0 00 00 00 00 00 00 00
+Received message: CAN ID=0x200, Length=8, Data: d0 00 00 00 00 00 00 00
+Received message: CAN ID=0x201, Length=8, Data: 15 39 00 00 00 00 00 00
+Received message: CAN ID=0x202, Length=8, Data: 60 00 00 00 00 00 00 00
+Received message: CAN ID=0x200, Length=8, Data: 40 00 00 00 00 00 00 00
+Received message: CAN ID=0x201, Length=8, Data: 2f 04 00 00 00 00 00 00
+Received message: CAN ID=0x202, Length=8, Data: f0 00 00 00 00 00 00 00
+Received message: CAN ID=0x100, Length=8, Data: 13 b9 00 70 69 28 00 00
+Received message: CAN ID=0x101, Length=8, Data: 09 00 00 00 00 00 00 00
+Received message: CAN ID=0x102, Length=8, Data: 4b 04 04 00 00 00 00 00
+Received message: CAN ID=0x100, Length=8, Data: 14 ab 00 93 4f 48 00 00
+Received message: CAN ID=0x101, Length=8, Data: 18 00 00 00 00 00 00 00
+Received message: CAN ID=0x102, Length=8, Data: 21 03 ad 00 00 00 00 00
+Received message: CAN ID=0x200, Length=8, Data: d0 00 00 00 00 00 00 00
+Received message: CAN ID=0x201, Length=8, Data: 48 3e 00 00 00 00 00 00
+Received message: CAN ID=0x202, Length=8, Data: 50 00 00 00 00 00 00 00
+Received message: CAN ID=0x200, Length=8, Data: 30 00 00 00 00 00 00 00
+Received message: CAN ID=0x201, Length=8, Data: 5d 4f 00 00 00 00 00 00
+Received message: CAN ID=0x202, Length=8, Data: 80 00 00 00 00 00 00 00
+Received message: CAN ID=0x200, Length=8, Data: f0 00 00 00 00 00 00 00
+Received message: CAN ID=0x201, Length=8, Data: 45 23 00 00 00 00 00 00
+Received message: CAN ID=0x202, Length=8, Data: 20 00 00 00 00 00 00 00
+Received message: CAN ID=0x200, Length=8, Data: 80 00 00 00 00 00 00 00
+Received message: CAN ID=0x201, Length=8, Data: 4e 2d 00 00 00 00 00 00
+Received message: CAN ID=0x202, Length=8, Data: c0 00 00 00 00 00 00 00

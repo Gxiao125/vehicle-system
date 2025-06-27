@@ -99,7 +99,7 @@ static int flexcan_dmabuf_mmap(struct dma_buf *dmabuf,
     int ret;
     phys_addr_t phys = virt_to_phys(priv->vaddr);
     
-    pr_info("DMA-BUF mmap调用: dmabuf=%p, ops=%p\n", dmabuf, dmabuf->ops);
+    // pr_info("DMA-BUF mmap调用: dmabuf=%p, ops=%p\n", dmabuf, dmabuf->ops);
     
     // 添加设备有效性检查
     if (!priv->dev) {
@@ -108,8 +108,8 @@ static int flexcan_dmabuf_mmap(struct dma_buf *dmabuf,
     }
     
     // 打印完整物理地址信息
-    pr_info("vaddr=%p, dma_handle=%pad, phys=%pap, size=%zu\n",
-           priv->vaddr, &priv->dma_handle, &phys, CAN_FRAME_SIZE);
+    // pr_info("vaddr=%p, dma_handle=%pad, phys=%pap, size=%zu\n",
+    //        priv->vaddr, &priv->dma_handle, &phys, CAN_FRAME_SIZE);
     
     // 使用直接物理映射
     pfn = __phys_to_pfn(phys);
@@ -124,8 +124,8 @@ static int flexcan_dmabuf_mmap(struct dma_buf *dmabuf,
     // 设置缓存属性
     vma->vm_page_prot = pgprot_noncached(vma->vm_page_prot);
     
-    pr_info("mmap成功: vma_start=0x%lx, size=%lu\n",
-           vma->vm_start, vma->vm_end - vma->vm_start);
+    // pr_info("mmap成功: vma_start=0x%lx, size=%lu\n",
+    //        vma->vm_start, vma->vm_end - vma->vm_start);
     
     return 0;
 }
@@ -189,7 +189,7 @@ static const struct dma_buf_ops flexcan_dmabuf_ops = {
 #define GET_TX_BUF_INDEX       _IOR('F', 0, int)
 #define GET_ALL_TX_BUFS   _IOR('F', 2, int)
 
-// 新增高效命令
+
 #define GET_ALL_RX_BUFS  _IOR('F', 4, int[DMA_POOL_SIZE]) // 获取所有RX缓冲区的fd
 #define GET_READY_INDEX  _IOR('F', 5, int)               // 获取就绪缓冲区索引
 #define RELEASE_BUF      _IOR('F', 6, int)               // 通过索引释放缓冲区
@@ -213,6 +213,7 @@ static long flexcan_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
 
         case GET_ALL_RX_BUFS:
             
+            // printk("GET_ALL_RX_BUFS \n");
             // 获取所有缓冲区的fd
             for (i = 0; i < DMA_POOL_SIZE; i++) {
                 get_dma_buf(ring->rx_bufs[i].dma_buf);
@@ -245,7 +246,7 @@ static long flexcan_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
                 tail = atomic_read(&ring->rx_tail);
                 avail = CIRC_CNT_ME(head, tail, DMA_POOL_SIZE);
                 
-                printk("GET_RX_BUF: head=%u, tail=%u, avail=%u\n", head, tail, avail);
+                // printk("GET_RX_BUF: head=%u, tail=%u, avail=%u\n", head, tail, avail);
                 
                 found = -1;
 
@@ -329,10 +330,10 @@ static long flexcan_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
             }
             
             // 添加详细的调试信息
-            pr_info("RELEASE_BUF: index=%d, head=%u, tail=%u\n", 
-                    idx, 
-                    atomic_read(&ring->rx_head),
-                    atomic_read(&ring->rx_tail));
+            // pr_info("RELEASE_BUF: index=%d, head=%u, tail=%u\n", 
+            //         idx, 
+            //         atomic_read(&ring->rx_head),
+            //         atomic_read(&ring->rx_tail));
             
             if (idx < 0 || idx >= DMA_POOL_SIZE) {
                 pr_err("无效的缓冲区索引: %d\n", idx);
@@ -488,10 +489,10 @@ static int init_dma_pool(struct device *dev, struct can_dma_buf *pool)
             goto err_export;
         }
 
-        pr_info("导出 DMA-BUF: vaddr=%p, ops=%p\n", 
-                    pool[i].vaddr, exp_info.ops);
+        // pr_info("导出 DMA-BUF: vaddr=%p, ops=%p\n", 
+        //             pool[i].vaddr, exp_info.ops);
 
-        pr_info("dma_buf_ops:%p", pool[i].dma_buf->ops);
+        // pr_info("dma_buf_ops:%p", pool[i].dma_buf->ops);
     }
 
     return 0;
@@ -563,8 +564,8 @@ static struct can_frame* get_dma_frame(int *index) {
     head = atomic_read(&ring->rx_head);
     tail = atomic_read(&ring->rx_tail);
     
-    printk("get_dma_frame: head=%u, tail=%u, space=%u\n", 
-            head, tail, CIRC_SPACE_ME(head, tail, DMA_POOL_SIZE));
+    // printk("get_dma_frame: head=%u, tail=%u, space=%u\n", 
+    //         head, tail, CIRC_SPACE_ME(head, tail, DMA_POOL_SIZE));
     
     // 计算可用空间
     if (CIRC_SPACE_ME(head, tail, DMA_POOL_SIZE) == 0) {

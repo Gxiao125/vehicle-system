@@ -83,17 +83,49 @@ CMakeFiles/VehicleCommunicationAPI.dir/api/VehicleCommunicationAPI.cpp.s: cmake_
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/VehicleCommunicationAPI.dir/api/VehicleCommunicationAPI.cpp.s"
 	/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xiao/project/vehicle-system/Middleware/api/VehicleCommunicationAPI.cpp -o CMakeFiles/VehicleCommunicationAPI.dir/api/VehicleCommunicationAPI.cpp.s
 
+CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.o: CMakeFiles/VehicleCommunicationAPI.dir/flags.make
+CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.o: /home/xiao/project/vehicle-system/Middleware/masage_parse/CanMessageParser.cpp
+CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.o: CMakeFiles/VehicleCommunicationAPI.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.o"
+	/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.o -MF CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.o.d -o CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.o -c /home/xiao/project/vehicle-system/Middleware/masage_parse/CanMessageParser.cpp
+
+CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.i"
+	/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xiao/project/vehicle-system/Middleware/masage_parse/CanMessageParser.cpp > CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.i
+
+CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.s"
+	/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xiao/project/vehicle-system/Middleware/masage_parse/CanMessageParser.cpp -o CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.s
+
+CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.o: CMakeFiles/VehicleCommunicationAPI.dir/flags.make
+CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.o: /home/xiao/project/vehicle-system/Middleware/sharedMemory/SharedMemoryPool.cpp
+CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.o: CMakeFiles/VehicleCommunicationAPI.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.o"
+	/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.o -MF CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.o.d -o CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.o -c /home/xiao/project/vehicle-system/Middleware/sharedMemory/SharedMemoryPool.cpp
+
+CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.i"
+	/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/xiao/project/vehicle-system/Middleware/sharedMemory/SharedMemoryPool.cpp > CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.i
+
+CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.s"
+	/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/xiao/project/vehicle-system/Middleware/sharedMemory/SharedMemoryPool.cpp -o CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.s
+
 # Object files for target VehicleCommunicationAPI
 VehicleCommunicationAPI_OBJECTS = \
-"CMakeFiles/VehicleCommunicationAPI.dir/api/VehicleCommunicationAPI.cpp.o"
+"CMakeFiles/VehicleCommunicationAPI.dir/api/VehicleCommunicationAPI.cpp.o" \
+"CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.o" \
+"CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.o"
 
 # External object files for target VehicleCommunicationAPI
 VehicleCommunicationAPI_EXTERNAL_OBJECTS =
 
 lib/libVehicleCommunicationAPI.a: CMakeFiles/VehicleCommunicationAPI.dir/api/VehicleCommunicationAPI.cpp.o
+lib/libVehicleCommunicationAPI.a: CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.o
+lib/libVehicleCommunicationAPI.a: CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.o
 lib/libVehicleCommunicationAPI.a: CMakeFiles/VehicleCommunicationAPI.dir/build.make
 lib/libVehicleCommunicationAPI.a: CMakeFiles/VehicleCommunicationAPI.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Linking CXX static library lib/libVehicleCommunicationAPI.a"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Linking CXX static library lib/libVehicleCommunicationAPI.a"
 	$(CMAKE_COMMAND) -P CMakeFiles/VehicleCommunicationAPI.dir/cmake_clean_target.cmake
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/VehicleCommunicationAPI.dir/link.txt --verbose=$(VERBOSE)
 

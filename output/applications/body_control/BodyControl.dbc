@@ -1,0 +1,17 @@
+BO_ 200 DOOR_STATUS : 1
+ SG_ DRIVER_DOOR 0|1@ 10 (1,0) [0|1] "" 
+ SG_ PASSENGER_DOOR 1|1@ 10 (1,0) [0|1] "" 
+ SG_ TRUNK 2|1@ 10 (1,0) [0|1] "" 
+ SG_ HOOD 3|1@ 10 (1,0) [0|1] "" 
+
+BO_ 201 WINDOW_STATUS : 2
+ SG_ DRIVER_WINDOW 0|8@ 10 (0.4,0) [0|100] "%" 
+ SG_ PASSENGER_WINDOW 8|8@ 10 (0.4,0) [0|100] "%" 
+
+BO_ 202 LIGHTING : 1
+ SG_ HEADLIGHTS 0|1@ 10 (1,0) [0|1] "" 
+ SG_ BRAKE_LIGHTS 1|1@ 10 (1,0) [0|1] "" 
+ SG_ INDICATOR_LEFT 2|1@ 10 (1,0) [0|1] "" 
+ SG_ INDICATOR_RIGHT 3|1@ 10 (1,0) [0|1] ""
+
+ 

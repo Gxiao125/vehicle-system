@@ -56,6 +56,8 @@ clean() {
         make -C "$PROJECT_ROOT/kernel_transport/can_dma_buffer" clean || true
         # 清理Middleware构建
         rm -rf "$PROJECT_ROOT/Middleware/build" || true
+        # 清理App构建
+        rm -rf "$PROJECT_ROOT/app/build" || true
     } > /dev/null 2>&1
     color_echo "${GREEN}" "Clean completed."
 }
@@ -131,6 +133,8 @@ build_drivers() {
     popd >/dev/null
     
     color_echo "${GREEN}" "Driver build completed."
+
+    # sudo cp -f  "$output_dir"/*.ko  /nfsroot/lib/modules/4.1.15/
 }
 
 # 编译Middleware应用
@@ -139,25 +143,92 @@ build_middleware() {
     local middleware_dir="$PROJECT_ROOT/Middleware"
     local build_dir="$middleware_dir/build"
     local output_dir="$OUTPUT_DIR/middleware"
-    
+
     # 创建构建目录
     mkdir -p "$build_dir"
     pushd "$build_dir" >/dev/null
-    
+
     # 配置交叉编译环境
     cmake -DCMAKE_TOOLCHAIN_FILE=../toolchain.cmake \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_INSTALL_PREFIX="$output_dir" \
-          .. || error_exit "CMake configuration failed"
-    
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX="$output_dir" \
+        .. || error_exit "CMake configuration failed"
+
     # 编译并安装
     make -j$(nproc) || error_exit "Middleware build failed"
     make install || error_exit "Middleware install failed"
-    
+
     check_build "Middleware" "$output_dir/bin/can_service"
     popd >/dev/null
-    
+
     color_echo "${GREEN}" "Middleware build completed."
+
+    # 确保目标目录存在
+    sudo mkdir -p /nfsroot/usr/local/bin
+    sudo mkdir -p /nfsroot/usr/local/include
+    sudo mkdir -p /nfsroot/usr/local/lib
+
+    # 复制文件到目标位置
+    sudo cp -f "$output_dir"/bin/* /nfsroot/usr/local/bin/
+    sudo cp -f "$output_dir"/include/*.h /nfsroot/usr/local/include/
+    sudo cp -f "$output_dir"/lib/*.a /nfsroot/usr/local/lib/
+
+    # 添加权限检查
+    if [ $? -ne 0 ]; then
+        color_echo "${RED}" "文件复制失败！请检查权限和目标路径"
+        exit 1
+    fi
+
+    color_echo "${GREEN}" "Middleware 文件已成功部署到 /nfsroot"
+}
+
+# 编译应用程序
+build_applications() {
+    color_echo "${YELLOW}" "Building Applications..."
+    local app_dir="$PROJECT_ROOT/app"
+    local build_dir="$app_dir/build"
+    local output_dir="$OUTPUT_DIR/applications"
+    
+
+    # 2. 创建构建目录
+    mkdir -p "$build_dir"
+    pushd "$build_dir" >/dev/null
+
+    # 3. 配置交叉编译环境
+    cmake -DCMAKE_TOOLCHAIN_FILE="$PROJECT_ROOT/Middleware/toolchain.cmake" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX="$output_dir" \
+        -DMIDDLEWARE_DIR="$OUTPUT_DIR/middleware" \
+        .. || error_exit "Applications CMake configuration failed"
+
+    # 4. 编译并安装
+    make -j$(nproc) || error_exit "Applications build failed"
+    make install || error_exit "Applications install failed"
+
+    popd >/dev/null
+
+    color_echo "${GREEN}" "Applications build completed."
+
+    sudo mkdir -p /nfsroot/app/body_control
+    sudo mkdir -p /nfsroot/app/brake_system
+    sudo mkdir -p /nfsroot/app/dashboard
+
+    # 6. 复制可执行文件和DBC文件
+    sudo cp "$output_dir/bin/body_control" /nfsroot/app/body_control/
+    sudo cp "$app_dir/body_control/BodyControl.dbc" /nfsroot/app/body_control/ 2>/dev/null || true
+
+    sudo cp "$output_dir/bin/powertrain" /nfsroot/app/brake_system/
+    sudo cp "$app_dir/brake_system/Powertrain.dbc" /nfsroot/app/brake_system/ 2>/dev/null || true
+
+    sudo cp "$output_dir/bin/dashboard" /nfsroot/app/dashboard/
+    sudo cp "$app_dir/dashboard/Dashboard.dbc" /nfsroot/app/dashboard/ 2>/dev/null || true
+
+    # 7. 设置执行权限
+    sudo chmod +x /nfsroot/app/body_control/body_control
+    sudo chmod +x /nfsroot/app/brake_system/powertrain
+    sudo chmod +x /nfsroot/app/dashboard/dashboard
+
+    color_echo "${GREEN}" "Applications deployed to /nfsroot/app"
 }
 
 # 生成交叉编译工具链文件
@@ -192,6 +263,7 @@ show_report() {
     echo "DeviceTree:  $(ls $OUTPUT_DIR/kernel/*.dtb 2>/dev/null | wc -l) files"
     echo "Drivers:     $(ls $OUTPUT_DIR/drivers/*.ko 2>/dev/null | wc -l) modules"
     echo "Middleware:  $(ls $OUTPUT_DIR/middleware/bin/* 2>/dev/null | wc -l) executables"
+    echo "Applications: $(find $OUTPUT_DIR/applications/bin -type f 2>/dev/null | wc -l) executables"
 }
 
 # 参数解析
@@ -220,6 +292,11 @@ parse_args() {
                 build_middleware
                 exit 0
                 ;;
+            -a|--app-only)
+                generate_toolchain_file
+                build_applications
+                exit 0
+                ;;
             -h|--help)
                 show_help
                 exit 0
@@ -240,6 +317,7 @@ show_help() {
     echo "  -k, --kernel-only     Build Kernel and modules"
     echo "  -d, --drivers-only    Build external drivers only"
     echo "  -m, --middleware-only Build Middleware application only"
+    echo "  -a, --app-only        Build applications only"
     echo "  -h, --help            Show this help"
 }
 
@@ -265,6 +343,9 @@ main() {
     # 为Middleware生成交叉编译工具链文件并构建
     generate_toolchain_file
     build_middleware
+    
+    # 编译应用程序
+    build_applications
     
     show_report
 }

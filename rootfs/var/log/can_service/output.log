@@ -1,0 +1,4 @@
+FlexCANController start success
+TransportLayer start success
+CANService started successfully.
+  Device: /dev/flexcan_dma

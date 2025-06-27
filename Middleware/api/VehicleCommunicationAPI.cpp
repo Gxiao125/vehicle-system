@@ -13,12 +13,23 @@
 #include <atomic>
 #include <thread>
 #include <cstring>
-
 // 共享内存消息结构
 
 
 VehicleCommunicationAPI::VehicleCommunicationAPI(const std::string& shm_name)
-    : shm_name_(shm_name), running_(false) {}
+    : shm_name_(shm_name), running_(false) {
+    // 初始化错误处理
+    error_handler_ = [](uint32_t can_id, const std::string& message) {
+        std::cerr << "CAN Error [" << std::hex << can_id << std::dec << "]: " << message << std::endl;
+    };
+    
+    try {
+    // 创建共享内存池实例
+        shm_pool_ = new SharedMemoryPool(shm_name, 64); // 注意：需要与TransportLayer使用相同的大小
+    }  catch (const std::exception& e) {
+        handleError(0, "Failed to create shared memory pool: " + std::string(e.what()));
+    }
+}
 
 VehicleCommunicationAPI::~VehicleCommunicationAPI() {
     stop();
@@ -28,32 +39,6 @@ void VehicleCommunicationAPI::start() {
     if (running_) return;
     
     running_ = true;
-    
-    // 打开共享内存
-    shm_fd_ = shm_open(shm_name_.c_str(), O_RDWR, 0666);
-    if (shm_fd_ == -1) {
-        handleError(0, "Failed to open shared memory: " + std::string(strerror(errno)));
-        return;
-    }
-    
-    // 获取共享内存大小
-    struct stat sb;
-    if (fstat(shm_fd_, &sb) == -1) {
-        handleError(0, "fstat failed: " + std::string(strerror(errno)));
-        close(shm_fd_);
-        return;
-    }
-    
-    // 映射共享内存
-    void* addr = mmap(nullptr, sb.st_size, PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd_, 0);
-    if (addr == MAP_FAILED) {
-        handleError(0, "mmap failed: " + std::string(strerror(errno)));
-        close(shm_fd_);
-        return;
-    }
-    
-    // 设置双缓冲通道指针
-    channel_ = static_cast<DoubleBufferChannel*>(addr);
     
     // 启动读取线程
     shm_reader_thread_ = std::thread(&VehicleCommunicationAPI::shmReaderThreadFunc, this);
@@ -65,17 +50,6 @@ void VehicleCommunicationAPI::stop() {
     if (shm_reader_thread_.joinable()) {
         shm_reader_thread_.join();
     }
-    
-    if (channel_) {
-        munmap(channel_, sizeof(DoubleBufferChannel) + channel_->pool_size * sizeof(TransportMessage));
-    }
-    
-    if (shm_fd_ != -1) {
-        close(shm_fd_);
-    }
-    
-    channel_ = nullptr;
-    shm_fd_ = -1;
 }
 
 void VehicleCommunicationAPI::registerSignalHandler(const std::string& signal_name, SignalCallback callback) {
@@ -127,64 +101,43 @@ bool VehicleCommunicationAPI::sendSignal(uint32_t can_id, const std::string& sig
 }
 
 bool VehicleCommunicationAPI::sendRawMessage(uint32_t can_id, const std::vector<uint8_t>& data) {
-    if (!channel_) {
+    if (!shm_pool_) {
         handleError(can_id, "Shared memory not initialized");
         return false;
     }
     
-    if (data.size() > sizeof(TransportMessage::data)) {
-        handleError(can_id, "Data too large for transmission");
+    // 使用共享内存池接口写入发送通道
+    if (!shm_pool_->writeToSendChannel(can_id, data)) {
+        handleError(can_id, "Failed to write to send channel");
         return false;
     }
-    
-    // 使用双缓冲通道的原子操作
-    size_t current_write = channel_->write_index.load(std::memory_order_relaxed);
-    size_t next_write = (current_write + 1) % channel_->pool_size;
-    
-    // 检查缓冲区是否已满
-    if (next_write == channel_->read_index.load(std::memory_order_acquire)) {
-        handleError(can_id, "Shared memory buffer full");
-        return false;
-    }
-    
-    // 填充消息
-    TransportMessage& msg = channel_->messages[current_write];
-    msg.can_id = can_id;
-    msg.timestamp = std::chrono::duration_cast<std::chrono::microseconds>(
-        std::chrono::system_clock::now().time_since_epoch()).count();
-    msg.data_length = static_cast<uint16_t>(data.size());
-    std::memcpy(msg.data, data.data(), data.size());
-    
-    // 原子更新写索引
-    channel_->write_index.store(next_write, std::memory_order_release);
     
     return true;
 }
 
 void VehicleCommunicationAPI::shmReaderThreadFunc() {
     while (running_) {
-        // 使用双缓冲通道的原子操作检查是否有新消息
-        size_t current_read = channel_->read_index.load(std::memory_order_relaxed);
+        uint32_t can_id;
+        std::vector<uint8_t> data;
         
-        if (current_read == channel_->write_index.load(std::memory_order_acquire)) {
+        // 使用共享内存池接口从接收通道读取消息
+        if (shm_pool_->readFromReceiveChannel(can_id, data)) {
+            // 处理消息
+            handleReceivedMessage(can_id, data);
+        } else {
+            // 没有数据时休眠
             std::this_thread::sleep_for(std::chrono::milliseconds(10));
-            continue;
         }
-        
-        // 读取消息
-        const TransportMessage& msg = channel_->messages[current_read];
-        
-        // 处理消息
-        std::vector<uint8_t> data(msg.data, msg.data + msg.data_length);
-        handleReceivedMessage(msg.can_id, data);
-        
-        // 原子更新读索引
-        size_t next_read = (current_read + 1) % channel_->pool_size;
-        channel_->read_index.store(next_read, std::memory_order_release);
     }
 }
 
 void VehicleCommunicationAPI::loadMessageDefinitions(const std::string& dbc_file_path) {
+
+    char cwd[1024];
+    if (getcwd(cwd, sizeof(cwd))) {
+        std::cout << "Current working directory: " << cwd << std::endl;
+    }
+    
     std::ifstream file(dbc_file_path);
     if (!file.is_open()) {
         handleError(0, "Failed to open DBC file: " + dbc_file_path);
@@ -310,4 +263,3 @@ void VehicleCommunicationAPI::handleError(uint32_t can_id, const std::string& me
         std::cerr << "CAN Error [" << std::hex << can_id << std::dec << "]: " << message << std::endl;
     }
 }
-

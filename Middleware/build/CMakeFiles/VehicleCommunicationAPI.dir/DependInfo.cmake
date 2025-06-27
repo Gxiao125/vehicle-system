@@ -9,6 +9,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
   "/home/xiao/project/vehicle-system/Middleware/api/VehicleCommunicationAPI.cpp" "CMakeFiles/VehicleCommunicationAPI.dir/api/VehicleCommunicationAPI.cpp.o" "gcc" "CMakeFiles/VehicleCommunicationAPI.dir/api/VehicleCommunicationAPI.cpp.o.d"
+  "/home/xiao/project/vehicle-system/Middleware/masage_parse/CanMessageParser.cpp" "CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.o" "gcc" "CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.o.d"
+  "/home/xiao/project/vehicle-system/Middleware/sharedMemory/SharedMemoryPool.cpp" "CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.o" "gcc" "CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.o.d"
   )
 
 # Targets to which this target links which contain Fortran sources.

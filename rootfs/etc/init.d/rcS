@@ -21,6 +21,35 @@ vsftpd &
 /sbin/sshd &
 
 if [ -f "/var/lib/alsa/asound.state" ]; then
-	echo "ALSA: Restoring mixer setting......"
-	/sbin/alsactl -f /var/lib/alsa/asound.state restore &
+        echo "ALSA: Restoring mixer setting......"
+        /sbin/alsactl -f /var/lib/alsa/asound.state restore &
 fi
+
+/sbin/ip link set can0 up type can bitrate 500000
+
+insmod /lib/modules/4.1.15/flexcan_dma.ko
+
+ifconfig can0 up
+
+# 设置库路径
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/lib:/app/lib
+
+# 启动 CAN 服务
+echo "Starting CAN Service..."
+/usr/local/bin/can_service > /var/log/can_service.log 2>&1 &
+sleep 2  # 等待 CAN 服务初始化
+
+# 启动车辆系统应用
+echo "Starting vehicle system applications..."
+
+# 启动车身控制系统
+/app/body_control/body_control > /var/log/body_control.log 2>&1 &
+
+# 启动动力系统
+/app/brake_system/powertrain > /var/log/powertrain.log 2>&1 &
+
+# 启动仪表盘
+/app/dashboard/dashboard > /var/log/dashboard.log 2>&1 &
+
+echo "Vehicle system applications started"
+

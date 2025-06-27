@@ -1,0 +1,24 @@
+[1;33mGenerating CMake toolchain file...[0m
+[0;32mToolchain file created: /home/xiao/project/vehicle-system/Middleware/toolchain.cmake[0m
+[1;33mBuilding Middleware application...[0m
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/xiao/project/vehicle-system/Middleware/build
+[ 12%] Built target SharedMemory
+[ 25%] Built target CanController
+[ 37%] Built target CanMessageParser
+[ 50%] Built target TransportLayer
+[ 56%] Building CXX object CMakeFiles/VehicleCommunicationAPI.dir/api/VehicleCommunicationAPI.cpp.o
+[ 68%] Built target CANService
+[ 81%] Built target can_service
+/home/xiao/project/vehicle-system/Middleware/api/VehicleCommunicationAPI.cpp: In member function ‘void VehicleCommunicationAPI::loadMessageDefinitions(const string&)’:
+/home/xiao/project/vehicle-system/Middleware/api/VehicleCommunicationAPI.cpp:136:57: error: qualified-id in declaration before ‘(’ token
+     void VehicleCommunicationAPI::loadMessageDefinitions(const std::string& dbc_file_path) {
+                                                         ^
+/home/xiao/project/vehicle-system/Middleware/api/VehicleCommunicationAPI.cpp:266:1: error: expected ‘}’ at end of input
+ }
+ ^
+make[2]: *** [CMakeFiles/VehicleCommunicationAPI.dir/build.make:76: CMakeFiles/VehicleCommunicationAPI.dir/api/VehicleCommunicationAPI.cpp.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:229: CMakeFiles/VehicleCommunicationAPI.dir/all] Error 2
+make: *** [Makefile:136: all] Error 2
+[0;31mError: Middleware build failed[0m

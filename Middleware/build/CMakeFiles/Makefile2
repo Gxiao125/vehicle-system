@@ -227,12 +227,12 @@ CMakeFiles/VehicleCommunicationAPI.dir/all: CMakeFiles/SharedMemory.dir/all
 CMakeFiles/VehicleCommunicationAPI.dir/all: CMakeFiles/CanMessageParser.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/VehicleCommunicationAPI.dir/build.make CMakeFiles/VehicleCommunicationAPI.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/VehicleCommunicationAPI.dir/build.make CMakeFiles/VehicleCommunicationAPI.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles --progress-num=11,12 "Built target VehicleCommunicationAPI"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles --progress-num=11,12,13,14 "Built target VehicleCommunicationAPI"
 .PHONY : CMakeFiles/VehicleCommunicationAPI.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/VehicleCommunicationAPI.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/xiao/project/vehicle-system/Middleware/build/CMakeFiles 6
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/xiao/project/vehicle-system/Middleware/build/CMakeFiles 8
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/VehicleCommunicationAPI.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/xiao/project/vehicle-system/Middleware/build/CMakeFiles 0
 .PHONY : CMakeFiles/VehicleCommunicationAPI.dir/rule
@@ -256,7 +256,7 @@ CMakeFiles/can_service.dir/all: CMakeFiles/TransportLayer.dir/all
 CMakeFiles/can_service.dir/all: CMakeFiles/CANService.dir/all
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/can_service.dir/build.make CMakeFiles/can_service.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/can_service.dir/build.make CMakeFiles/can_service.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles --progress-num=13,14 "Built target can_service"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/xiao/project/vehicle-system/Middleware/build/CMakeFiles --progress-num=15,16 "Built target can_service"
 .PHONY : CMakeFiles/can_service.dir/all
 
 # Build rule for subdir invocation for target.

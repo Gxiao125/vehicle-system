@@ -33,14 +33,16 @@ void CANService::start() {
         
         // 启动系统
         can_controller_.start();
+
         transport_layer_.start();
+
         
         running_ = true;
         global_running_.store(true);
         
         std::cout << "CANService started successfully." << std::endl;
         std::cout << "  Device: " << can_controller_.getDevicePath() << std::endl;
-        std::cout << "  Shared memory: " << transport_layer_.getShmName() << std::endl;
+        // std::cout << "  Shared memory: " << transport_layer_.getShmName() << std::endl;
         std::cout << "Press Ctrl+C to stop..." << std::endl;
         
     } catch (const std::exception& e) {

@@ -447,8 +447,6 @@ int flexcan_hw_xmit(struct net_device *dev, dma_addr_t dma_addr, void *vaddr)
     flexcan_write(FLEXCAN_MB_CODE_TX_INACTIVE,
                  &regs->cantxfg[FLEXCAN_TX_BUF_RESERVED].can_ctrl);
 
-    /* 打印调试信息 */
-    printk( "TX Frame: ID=0x%X, DLC=%d\n", cf->can_id, cf->can_dlc);
     
     return 0;
 }

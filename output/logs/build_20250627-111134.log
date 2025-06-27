@@ -1,0 +1,9 @@
+[1;33mGenerating CMake toolchain file...[0m
+[0;32mToolchain file created: /home/xiao/project/vehicle-system/Middleware/toolchain.cmake[0m
+[1;33mBuilding Applications...[0m
+CMake Error at body_control/CMakeLists.txt:11 (message):
+  Middleware library not found.  Please build Middleware first.
+
+
+-- Configuring incomplete, errors occurred!
+[0;31mError: Applications CMake configuration failed[0m

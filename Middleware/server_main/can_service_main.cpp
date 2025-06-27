@@ -4,10 +4,10 @@
 #include <csignal>
 #include <cstdlib>
 #include <memory>
-
+#include <iomanip>
 int main(int argc, char* argv[]) {
     // 默认参数
-    std::string device_path = "/dev/can0";
+    std::string device_path = "/dev/flexcan_dma";
     std::string shm_name = "/can_shared_mem";
     size_t shm_pool_size = 64;
     
@@ -23,11 +23,29 @@ int main(int argc, char* argv[]) {
         // 注册消息处理器（可选）
         service.registerMessageHandler([](uint32_t can_id, const std::vector<uint8_t>& data) {
             std::cout << "Received message: CAN ID=0x" << std::hex << can_id << std::dec
-                      << ", Length=" << data.size() << std::endl;
+                    << ", Length=" << data.size() << ", Data: ";
+            
+            // 输出数据内容（十六进制格式）
+            for (size_t i = 0; i < data.size(); i++) {
+                // 每个字节输出为两位十六进制数
+                std::cout << std::hex << std::setw(2) << std::setfill('0') 
+                        << static_cast<int>(data[i]);
+                
+                // 在字节之间添加空格（除了最后一个字节）
+                if (i < data.size() - 1) {
+                    std::cout << " ";
+                }
+            }
+            
+            std::cout << std::dec << std::endl;
         });
         
         // 启动服务
         service.start();
+
+        
+
+        std::cout << "service start ..........!" << std::endl;
         
         // 主循环
         while (service.isRunning()) {

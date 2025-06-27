@@ -22,7 +22,7 @@ bool FlexCANController::init() {
         perror("failed to open device");
         return false;
     }
-
+    
     return mapBuffers();
 }
 
@@ -35,7 +35,7 @@ bool FlexCANController::mapBuffers() {
 
     for (int i = 0; i < DMA_POOL_SIZE; i++) {
         rx_buffers_[i] = mmap(nullptr, sizeof(can_frame), PROT_READ, 
-                             MAP_SHARED, dev_fd_, 0);
+                             MAP_SHARED, rx_fds[i], 0);
         if (rx_buffers_[i] == MAP_FAILED) {
             std::cerr << "mmap RX buffer failed: " << strerror(errno) << std::endl;
             return false;
@@ -86,6 +86,7 @@ void FlexCANController::start() {
     running_ = true;
     receive_thread_ = std::thread(&FlexCANController::receiveThreadFunc, this);
     tx_thread_ = std::thread(&FlexCANController::txBufferManager, this);
+    std::cout<< "FlexCANController start success" << std::endl;
 }
 
 void FlexCANController::stop() {
@@ -94,12 +95,15 @@ void FlexCANController::stop() {
 
     if (receive_thread_.joinable()) receive_thread_.join();
     if (tx_thread_.joinable()) tx_thread_.join();
+
+    std::cout<< "FlexCANController stopped" << std::endl;
 }
 
 void FlexCANController::receiveThreadFunc() {
     struct pollfd fds = {.fd = dev_fd_, .events = POLLIN};
 
     while(running_) {
+    
         int ret = poll(&fds, 1, 100);
         if (!running_) break;
 
@@ -116,6 +120,8 @@ void FlexCANController::receiveThreadFunc() {
                 continue;
             }
 
+
+
             for (int i = 0; i < ready_count; i++) {
                 int idx;
                 if (ioctl(dev_fd_, GET_READY_INDEX, &idx) < 0) {
@@ -126,7 +132,7 @@ void FlexCANController::receiveThreadFunc() {
 
                 // 直接使用映射的内存区域，避免拷贝
                 const can_frame* frame = static_cast<const can_frame*>(rx_buffers_[idx]);
-                
+
                 EnhancedCANFrame enhanced_frame;
                 enhanced_frame.frame_ptr = frame;  // 直接传递指针
                 enhanced_frame.timestamp = static_cast<uint32_t>(

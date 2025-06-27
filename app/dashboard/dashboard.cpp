@@ -1,7 +1,7 @@
 #include "VehicleCommunicationAPI.h"
 #include <iostream>
 #include <thread>
-#include <ncurses.h> // 用于控制台显示
+// #include <ncurses.h> // 用于控制台显示
 
 void vehicleStatusHandler(const std::string& name, double value, const std::string& unit) {
     // 实际实现会在UI中更新
@@ -38,8 +38,8 @@ void updateDashboardDisplay(const VehicleCommunicationAPI& api) {
 }
 
 int main() {
-    VehicleCommunicationAPI api("/vehicle_bus");
-    api.loadMessageDefinitions("Dashboard.dbc");
+    VehicleCommunicationAPI api("/can_shared_mem");
+    api.loadMessageDefinitions("/app/dashboard/Dashboard.dbc");
     
     // 注册信号处理回调
     api.registerSignalHandler("SPEED", vehicleStatusHandler);

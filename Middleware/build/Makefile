@@ -354,6 +354,7 @@ masage_parse/CanMessageParser.o: masage_parse/CanMessageParser.cpp.o
 # target to build an object file
 masage_parse/CanMessageParser.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/CanMessageParser.dir/build.make CMakeFiles/CanMessageParser.dir/masage_parse/CanMessageParser.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/VehicleCommunicationAPI.dir/build.make CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.o
 .PHONY : masage_parse/CanMessageParser.cpp.o
 
 masage_parse/CanMessageParser.i: masage_parse/CanMessageParser.cpp.i
@@ -362,6 +363,7 @@ masage_parse/CanMessageParser.i: masage_parse/CanMessageParser.cpp.i
 # target to preprocess a source file
 masage_parse/CanMessageParser.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/CanMessageParser.dir/build.make CMakeFiles/CanMessageParser.dir/masage_parse/CanMessageParser.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/VehicleCommunicationAPI.dir/build.make CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.i
 .PHONY : masage_parse/CanMessageParser.cpp.i
 
 masage_parse/CanMessageParser.s: masage_parse/CanMessageParser.cpp.s
@@ -370,6 +372,7 @@ masage_parse/CanMessageParser.s: masage_parse/CanMessageParser.cpp.s
 # target to generate assembly for a file
 masage_parse/CanMessageParser.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/CanMessageParser.dir/build.make CMakeFiles/CanMessageParser.dir/masage_parse/CanMessageParser.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/VehicleCommunicationAPI.dir/build.make CMakeFiles/VehicleCommunicationAPI.dir/masage_parse/CanMessageParser.cpp.s
 .PHONY : masage_parse/CanMessageParser.cpp.s
 
 server_main/can_service_main.o: server_main/can_service_main.cpp.o
@@ -402,6 +405,7 @@ sharedMemory/SharedMemoryPool.o: sharedMemory/SharedMemoryPool.cpp.o
 # target to build an object file
 sharedMemory/SharedMemoryPool.cpp.o:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SharedMemory.dir/build.make CMakeFiles/SharedMemory.dir/sharedMemory/SharedMemoryPool.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/VehicleCommunicationAPI.dir/build.make CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.o
 .PHONY : sharedMemory/SharedMemoryPool.cpp.o
 
 sharedMemory/SharedMemoryPool.i: sharedMemory/SharedMemoryPool.cpp.i
@@ -410,6 +414,7 @@ sharedMemory/SharedMemoryPool.i: sharedMemory/SharedMemoryPool.cpp.i
 # target to preprocess a source file
 sharedMemory/SharedMemoryPool.cpp.i:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SharedMemory.dir/build.make CMakeFiles/SharedMemory.dir/sharedMemory/SharedMemoryPool.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/VehicleCommunicationAPI.dir/build.make CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.i
 .PHONY : sharedMemory/SharedMemoryPool.cpp.i
 
 sharedMemory/SharedMemoryPool.s: sharedMemory/SharedMemoryPool.cpp.s
@@ -418,6 +423,7 @@ sharedMemory/SharedMemoryPool.s: sharedMemory/SharedMemoryPool.cpp.s
 # target to generate assembly for a file
 sharedMemory/SharedMemoryPool.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/SharedMemory.dir/build.make CMakeFiles/SharedMemory.dir/sharedMemory/SharedMemoryPool.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/VehicleCommunicationAPI.dir/build.make CMakeFiles/VehicleCommunicationAPI.dir/sharedMemory/SharedMemoryPool.cpp.s
 .PHONY : sharedMemory/SharedMemoryPool.cpp.s
 
 # Help Target
