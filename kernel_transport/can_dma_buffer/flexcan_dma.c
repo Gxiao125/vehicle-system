@@ -329,10 +329,10 @@ static long flexcan_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
                 return -EFAULT;
             }
             
-            pr_info("RELEASE_BUF: index=%d, head=%u, tail=%u\n", 
-                    idx, 
-                    atomic_read(&ring->rx_head),
-                    atomic_read(&ring->rx_tail));
+            // pr_info("RELEASE_BUF: index=%d, head=%u, tail=%u\n", 
+            //         idx, 
+            //         atomic_read(&ring->rx_head),
+            //         atomic_read(&ring->rx_tail));
             
             if (idx < 0 || idx >= DMA_POOL_SIZE) {
                 pr_err("无效的缓冲区索引: %d\n", idx);
@@ -341,8 +341,8 @@ static long flexcan_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
             
             spin_lock_irqsave(&ring->rx_lock, flags);
             
-            pr_info("Buffer %d status before release: %d\n",
-                idx, atomic_read(&ring->rx_bufs[idx].status));
+            // pr_info("Buffer %d status before release: %d\n",
+            //     idx, atomic_read(&ring->rx_bufs[idx].status));
                     
             if (atomic_read(&ring->rx_bufs[idx].status) != FRAME_IN_USE) {
                 pr_warn("缓冲区 %d 状态错误: %d (应为 IN_USE)\n",
