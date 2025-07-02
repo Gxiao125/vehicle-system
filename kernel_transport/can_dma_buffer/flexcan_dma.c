@@ -10,8 +10,8 @@
 #define FRAME_PENDING 4
 
 
-#define CIRC_CNT_ME(head, tail, size) ((head) >= (tail) ? (head) - (tail) : (size) - (tail) + (head))
-#define CIRC_SPACE_ME(head, tail, size) ((size) - CIRC_CNT_ME(head, tail, size) - 1)
+// #define CIRC_CNT(head, tail, size) (((head) - (tail)) & ((size) - 1))
+// #define CIRC_SPACE(head, tail, size) CIRC_CNT((tail), (head) + 1, (size))
 
 // 添加缺失的成员
 struct can_dma_buf {
@@ -244,7 +244,7 @@ static long flexcan_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
             while (1) {
                 head = atomic_read(&ring->rx_head);
                 tail = atomic_read(&ring->rx_tail);
-                avail = CIRC_CNT_ME(head, tail, DMA_POOL_SIZE);
+                avail = CIRC_CNT(head, tail, DMA_POOL_SIZE);
                 
                 // printk("GET_RX_BUF: head=%u, tail=%u, avail=%u\n", head, tail, avail);
                 
@@ -318,7 +318,7 @@ static long flexcan_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
         case GET_READY_COUNT:
             head = atomic_read(&ring->rx_head);
             tail = atomic_read(&ring->rx_tail);
-            avail = CIRC_CNT_ME(head, tail, DMA_POOL_SIZE);
+            avail = CIRC_CNT(head, tail, DMA_POOL_SIZE);
             put_user(avail, uarg);
             break;
 
@@ -329,11 +329,10 @@ static long flexcan_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
                 return -EFAULT;
             }
             
-            // 添加详细的调试信息
-            // pr_info("RELEASE_BUF: index=%d, head=%u, tail=%u\n", 
-            //         idx, 
-            //         atomic_read(&ring->rx_head),
-            //         atomic_read(&ring->rx_tail));
+            pr_info("RELEASE_BUF: index=%d, head=%u, tail=%u\n", 
+                    idx, 
+                    atomic_read(&ring->rx_head),
+                    atomic_read(&ring->rx_tail));
             
             if (idx < 0 || idx >= DMA_POOL_SIZE) {
                 pr_err("无效的缓冲区索引: %d\n", idx);
@@ -342,20 +341,22 @@ static long flexcan_ioctl(struct file *filp, unsigned int cmd, unsigned long arg
             
             spin_lock_irqsave(&ring->rx_lock, flags);
             
+            pr_info("Buffer %d status before release: %d\n",
+                idx, atomic_read(&ring->rx_bufs[idx].status));
+                    
             if (atomic_read(&ring->rx_bufs[idx].status) != FRAME_IN_USE) {
                 pr_warn("缓冲区 %d 状态错误: %d (应为 IN_USE)\n",
                     idx, atomic_read(&ring->rx_bufs[idx].status));
-                spin_unlock_irqrestore(&ring->rx_lock, flags);
-                return -EINVAL;
+                // 强制释放缓冲区
+                atomic_set(&ring->rx_bufs[idx].status, FRAME_FREE);
+            } else {
+                atomic_set(&ring->rx_bufs[idx].status, FRAME_FREE);
             }
             
-            atomic_set(&ring->rx_bufs[idx].status, FRAME_FREE);
             wake_up_interruptible(&ring->rx_wq);
             
             spin_unlock_irqrestore(&ring->rx_lock, flags);
-
             break;
-
     
         case GET_ALL_TX_BUFS:
             for (i = 0; i < DMA_POOL_SIZE; i++) {
@@ -558,31 +559,24 @@ static struct can_frame* get_dma_frame(int *index) {
     unsigned long flags;
     u32 head, tail;
     int idx;
+    unsigned int used, space;
     
     spin_lock_irqsave(&ring->rx_lock, flags);
     
     head = atomic_read(&ring->rx_head);
     tail = atomic_read(&ring->rx_tail);
     
-    // printk("get_dma_frame: head=%u, tail=%u, space=%u\n", 
-    //         head, tail, CIRC_SPACE_ME(head, tail, DMA_POOL_SIZE));
+    // 使用正确的环形缓冲区计算
+    used = CIRC_CNT(head, tail, 2 * DMA_POOL_SIZE);
+    space = DMA_POOL_SIZE - used;
     
-    // 计算可用空间
-    if (CIRC_SPACE_ME(head, tail, DMA_POOL_SIZE) == 0) {
-        int i = 0;
-        for (i = tail; i < head; i++){
-            if (&ring->rx_bufs[i].status == FRAME_FREE) 
-            {   
-                printk("find &ring->rx_bufs[idx].status == FRAME_FREE\n\n");
-                tail++;
-            }
-        }
-        atomic_set(&ring->rx_tail, tail);
-    }
-
-
-    if (CIRC_SPACE_ME(head, tail, DMA_POOL_SIZE) == 0) {
-        pr_warn_ratelimited("RX ring full! head=%u tail=%u\n", head, tail);
+    pr_debug("get_dma_frame: head=%u tail=%u used=%u space=%u\n",
+             head, tail, used, space);
+    
+    // 检查空间是否不足
+    if (space == 0) {
+        pr_warn_ratelimited("RX ring full! head=%u tail=%u used=%u\n",
+                           head, tail, used);
         spin_unlock_irqrestore(&ring->rx_lock, flags);
         return NULL;
     }
@@ -625,42 +619,58 @@ static void rx_data_complete(int index)
     
     spin_lock_irqsave(&ring->rx_lock, flags);
     
+    // 确保缓冲区在正确的状态
     if (atomic_read(&ring->rx_bufs[index].status) != FRAME_PENDING) {
         pr_warn("Unexpected status %d for buffer %d\n",
                atomic_read(&ring->rx_bufs[index].status), index);
+        // 强制设置为正确状态
+        atomic_set(&ring->rx_bufs[index].status, FRAME_READY);
+    } else {
+        atomic_set(&ring->rx_bufs[index].status, FRAME_READY);
     }
     
-    atomic_set(&ring->rx_bufs[index].status, FRAME_READY);
     wake_up_interruptible(&ring->rx_wq);
     
     spin_unlock_irqrestore(&ring->rx_lock, flags);
 }
 
-// 使用旧版定时器API
 static void frame_timeout_handler(unsigned long data)
 {
     struct flexcan_dma_ring *ring = (struct flexcan_dma_ring *)data;
     unsigned long flags;
+    u32 head, tail;
     int idx;
-    u32 tail;
+    unsigned int count;
 
     spin_lock_irqsave(&ring->rx_lock, flags);
+    head = atomic_read(&ring->rx_head);
     tail = atomic_read(&ring->rx_tail);
-    
-    for (idx = 0; idx < DMA_POOL_SIZE; idx++) {
-        // 只处理长时间未取走的READY缓冲区
-        if (atomic_read(&ring->rx_bufs[idx].status) == FRAME_READY &&
-            time_after(jiffies, ring->rx_bufs[idx].timestamp + 5 * HZ)) {
-                
-            // 确保在环形缓冲区中
-            if (idx == (tail % DMA_POOL_SIZE)) {
+
+    // 计算环形缓冲区中的帧数
+    count = CIRC_CNT(head, tail, 2 * DMA_POOL_SIZE);
+
+    while (count > 0) {
+        idx = tail % DMA_POOL_SIZE;
+
+        // 只处理状态为READY的缓冲区
+        if (atomic_read(&ring->rx_bufs[idx].status) == FRAME_READY) {
+            if (time_after(jiffies, ring->rx_bufs[idx].timestamp + 5 * HZ)) {
+                // 超时，释放该缓冲区
                 atomic_set(&ring->rx_bufs[idx].status, FRAME_FREE);
-                atomic_set(&ring->rx_tail, (tail + 1) % (2 * DMA_POOL_SIZE));
-                tail = atomic_read(&ring->rx_tail);
+                // 移动 tail 指针
+                tail = (tail + 1) % (2 * DMA_POOL_SIZE);
+                atomic_set(&ring->rx_tail, tail);
                 pr_warn("Timeout release buffer %d\n", idx);
+                count--;
+                continue;  // 继续检查下一个缓冲区
             }
         }
+        
+        // 移动到下一个缓冲区
+        tail = (tail + 1) % (2 * DMA_POOL_SIZE);
+        count--;
     }
+
     spin_unlock_irqrestore(&ring->rx_lock, flags);
     mod_timer(&ring->timeout_timer, jiffies + 5 * HZ);
 }
@@ -712,6 +722,13 @@ static int __init flexcan_dma_init(void)
     atomic_set(&dma_ring->tx_cons, 0);
     atomic_set(&dma_ring->rx_head, 0);
     atomic_set(&dma_ring->rx_tail, 0);
+
+
+    for (i = 0; i < DMA_POOL_SIZE; i++) {
+        atomic_set(&dma_ring->rx_bufs[i].status, FRAME_FREE);
+        atomic_set(&dma_ring->tx_bufs[i].status, FRAME_FREE);
+    }
+
     spin_lock_init(&dma_ring->tx_lock);
     spin_lock_init(&dma_ring->rx_lock);
     init_waitqueue_head(&dma_ring->tx_wq);
