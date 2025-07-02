@@ -132,7 +132,7 @@ void VehicleCommunicationAPI::shmReaderThreadFunc() {
 }
 
 void VehicleCommunicationAPI::loadMessageDefinitions(const std::string& dbc_file_path) {
-
+    std::cout << "=== 开始加载 DBC 文件: " << dbc_file_path << " ===" << std::endl;
     char cwd[1024];
     if (getcwd(cwd, sizeof(cwd))) {
         std::cout << "Current working directory: " << cwd << std::endl;
@@ -144,86 +144,205 @@ void VehicleCommunicationAPI::loadMessageDefinitions(const std::string& dbc_file
         return;
     }
 
+    auto left_trim = [](std::string& s) {
+        s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch) {
+            return !std::isspace(ch);
+        }));
+    };
+
+    auto right_trim = [](std::string& s) {
+        s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
+            return !std::isspace(ch);
+        }).base(), s.end());
+    };
+
     std::string line;
     CanMessageParser::MessageDefinition current_msg;
     bool in_message = false;
 
     while (std::getline(file, line)) {
         // 去除前后空白
-        auto left_trim = [](std::string& s) {
-            s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](int ch){
-                return !std::isspace(ch);
-            }));
-        };
-
-        auto right_trim = [](std::string& s) {
-            s.erase(std::find_if(s.rbegin(), s.rend(), [](int ch) {
-                return !std::isspace(ch);
-            }).base(), s.end());
-        };
-        
         left_trim(line);
         right_trim(line);
 
         if (line.empty()) continue;
 
         if (line.find("BO_") == 0) {
-            if (in_message) {
-                message_parser_.registerMessage(current_msg);
-            }
+        if (in_message) {
+            std::cout << ">> 注册消息: CAN_ID=0x" << std::hex << current_msg.can_id 
+                    << " (十进制:" << std::dec << current_msg.can_id << ")"
+                    << ", 名称='" << current_msg.name << "', 信号数=" 
+                    << current_msg.signals.size() << std::endl;
+            message_parser_.registerMessage(current_msg);
+        }
 
-            std::istringstream iss(line);
-            std::string token;
-            iss >> token; // "BO_"
-            iss >> current_msg.can_id;
-            iss >> current_msg.name;
-            iss >> token; // ":"
-            iss >> current_msg.dlc;
+        std::istringstream iss(line);
+        std::string token;
+        iss >> token; // "BO_"
+        
+        // 1. 读取 CAN ID（十进制）
+        uint32_t can_id_decimal;
+        if (!(iss >> can_id_decimal)) {
+            std::cerr << "!! 无法读取 CAN ID: " << line << std::endl;
+            in_message = false;
+            continue;
+        }
+        current_msg.can_id = can_id_decimal;
+        
+        // 2. 读取消息名称（可能包含空格）
+        std::ostringstream name_oss;
+        while (iss >> token && token != ":") {
+            
+            if (!name_oss.str().empty()) name_oss << " ";
+            name_oss << token;
+            }
+            current_msg.name = name_oss.str();
+            
+            // 3. 读取 DLC
+            unsigned int dlc_value;
+            if (!(iss >> dlc_value)) {
+                std::cerr << "!! 无法读取 DLC: " << line << std::endl;
+                in_message = false;
+                continue;
+            }
+            current_msg.dlc = static_cast<uint8_t>(dlc_value);
+            
+            // 4. 忽略可选的发送节点
+            std::string transmitter;
+            iss >> transmitter;
+            
+            // 打印新消息信息
+            std::cout << "\n=== 开始解析消息 ===\n"
+                    << "CAN ID (十进制): " << current_msg.can_id << "\n"
+                    << "CAN ID (十六进制): 0x" << std::hex << current_msg.can_id << std::dec << "\n"
+                    << "名称: " << current_msg.name << "\n"
+                    << "DLC: " << static_cast<int>(current_msg.dlc) << "\n";
 
             current_msg.signals.clear();
             in_message = true;
+
         }
         else if (in_message && line.find("SG_") == 0) {
             std::istringstream iss(line);
             std::string token;
             iss >> token; // "SG_"
 
-            CanMessageParser::SignalDefinition sig_def;
             std::string sig_name;
-            iss >> sig_name;
+            if (!(iss >> sig_name)) {
+                std::cerr << "!! 无法读取信号名称: " << line << std::endl;
+                continue;
+            }
+
+            CanMessageParser::SignalDefinition sig_def;
             
-            // 解析起始位和长度 (格式: "start_bit|length@")
-            char pipe, at_sign;
-            iss >> sig_def.start_bit >> pipe >> sig_def.length >> at_sign;
+            // 1. 解析位域部分 (格式: start_bit|length@)
+            std::string bit_field;
+            if (!(iss >> bit_field)) {
+                std::cerr << "!! 无法读取位域: " << line << std::endl;
+                continue;
+            }
 
-            // 解析字节顺序 (1=大端, 0=小端) 和符号 (0=无符号, 1=有符号)
-            char byte_order, sign;
-            iss >> byte_order >> sign;
-            sig_def.is_signed = (sign == '1');
+            // 解析位域格式
+            size_t pipe_pos = bit_field.find('|');
+            size_t at_pos = bit_field.find('@');
+            
+            if (pipe_pos == std::string::npos || at_pos == std::string::npos) {
+                std::cerr << "!! 无效位域格式: " << bit_field << " in " << line << std::endl;
+                continue;
+            }
+            
+            try {
+                sig_def.start_bit = static_cast<uint16_t>(
+                    std::stoul(bit_field.substr(0, pipe_pos)));
+                
+                sig_def.length = static_cast<uint8_t>(
+                    std::stoul(bit_field.substr(pipe_pos + 1, at_pos - pipe_pos - 1)));
+            } catch (const std::exception& e) {
+                std::cerr << "!! 位域转换错误: " << e.what() 
+                          << " in " << bit_field << std::endl;
+                continue;
+            }
 
-            // 解析缩放因子和偏移量 (格式: "(scale,offset)")
-            char paren, comma;
-            iss >> paren >> sig_def.scale >> comma >> sig_def.offset >> paren;
+            // 2. 解析字节顺序和符号 (格式: byte_order sign)
+            char byte_order_char, sign_char;
+            if (!(iss >> byte_order_char >> sign_char)) {
+                std::cerr << "!! 无法读取字节顺序/符号: " << line << std::endl;
+                continue;
+            }
+            
+            sig_def.byte_order = (byte_order_char == '1') ? 
+                CanMessageParser::ByteOrder::_BIG_ENDIAN : 
+                CanMessageParser::ByteOrder::_LITTLE_ENDIAN;
+            
+            sig_def.is_signed = (sign_char == '1');
 
-            // 解析最小值和最大值 (格式: "[min|max]")
-            char bracket;
-            iss >> bracket >> sig_def.min >> pipe >> sig_def.max >> bracket;
+            // 3. 解析缩放和偏移 (格式: (scale,offset))
+            char paren1, comma, paren2;
+            double scale, offset;
+            if (!(iss >> paren1 >> scale >> comma >> offset >> paren2)) {
+                std::cerr << "!! 无法读取缩放/偏移: " << line << std::endl;
+                continue;
+            }
+            if (paren1 != '(' || comma != ',' || paren2 != ')') {
+                std::cerr << "!! 缩放/偏移格式错误: " << line << std::endl;
+                continue;
+            }
+            sig_def.scale = scale;
+            sig_def.offset = offset;
 
-            // 解析单位 (格式: "unit")
+            // 4. 解析最小/最大值 (格式: [min|max])
+            char bracket1, pipe_char, bracket2;
+            double min_val, max_val;
+            if (!(iss >> bracket1 >> min_val >> pipe_char >> max_val >> bracket2)) {
+                std::cerr << "!! 无法读取范围: " << line << std::endl;
+                continue;
+            }
+            if (bracket1 != '[' || pipe_char != '|' || bracket2 != ']') {
+                std::cerr << "!! 范围格式错误: " << line << std::endl;
+                continue;
+            }
+            sig_def.min = min_val;
+            sig_def.max = max_val;
+
+            // 5. 解析单位
             std::string unit;
-            iss >> unit;
-            if (!unit.empty() && unit.front() == '"' && unit.back() == '"') {
-                unit = unit.substr(1, unit.size() - 2);
+            if (iss >> unit) {
+                if (unit.size() >= 2 && unit.front() == '"' && unit.back() == '"') {
+                    unit = unit.substr(1, unit.size() - 2);
+                }
             }
             sig_def.unit = unit;
             
             current_msg.signals[sig_name] = sig_def;
+
+            // 打印信号详情
+            std::cout << "  >> 信号: " << sig_name << "\n"
+                      << "    起始位: " << sig_def.start_bit 
+                      << ", 长度: " << static_cast<int>(sig_def.length) << "\n"
+                      << "    字节顺序: " 
+                      << (sig_def.byte_order == CanMessageParser::ByteOrder::_BIG_ENDIAN ? "大端" : "小端") 
+                      << "\n"
+                      << "    有符号: " << (sig_def.is_signed ? "是" : "否") << "\n"
+                      << "    缩放: " << sig_def.scale 
+                      << ", 偏移: " << sig_def.offset << "\n"
+                      << "    范围: [" << sig_def.min << "|" << sig_def.max << "]\n"
+                      << "    单位: '" << sig_def.unit << "'\n";
+        }
+        else if (in_message) {
+            // 打印无法识别的行（调试用）
+            std::cout << "!! 忽略行: " << line << std::endl;
         }
     }
 
     if (in_message) {
+        std::cout << ">> 注册消息: CAN_ID=0x" << std::hex << current_msg.can_id 
+                  << ", 名称='" << current_msg.name << "', 信号数=" 
+                  << current_msg.signals.size() << std::dec << std::endl;
         message_parser_.registerMessage(current_msg);
     }
+
+    std::cout << "\n=== DBC 文件解析完成 ===" << std::endl;
+    std::cout << "总共解析消息数: " << message_parser_.getMessageDefinitions().size() << std::endl;
 }
 
 void VehicleCommunicationAPI::addMessageDefinition(const CanMessageParser::MessageDefinition& definition) {

@@ -128,6 +128,9 @@ void FlexCANController::receiveThreadFunc() {
                     perror("get ready index failed");
                     continue;
                 }
+                
+                std::cout << "GETFRAME IDX:"<<idx<<std::endl;
+
                 if (idx < 0 || idx >= DMA_POOL_SIZE) continue;
 
                 // 直接使用映射的内存区域，避免拷贝
@@ -148,6 +151,8 @@ void FlexCANController::receiveThreadFunc() {
 
                 if (ioctl(dev_fd_, RELEASE_BUF, &idx) < 0) {
                     perror("release buf failed");
+                } else {
+                    std::cout << "RELEASE IDX:"<<idx<<std::endl;
                 }
             }
         }
