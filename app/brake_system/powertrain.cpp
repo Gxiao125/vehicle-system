@@ -77,18 +77,18 @@ int main() {
         }
         
         // 发送信号（无锁区域）
-        // api.sendSignal("RPM", rpm);
-        // api.sendSignal("SPEED", speed);
-        // api.sendSignal("COOLANT_TEMP", 90 + 10 * sin(speed/5));
-        // api.sendSignal("THROTTLE_POS", throttle);
+        api.sendSignal("RPM", rpm);
+        api.sendSignal("SPEED", speed);
+        api.sendSignal("COOLANT_TEMP", 90 + 10 * sin(speed/5));
+        api.sendSignal("THROTTLE_POS", throttle);
         
-        // // 明确指定整数类型
-        // api.sendSignal("CURRENT_GEAR", static_cast<int64_t>(gear));
-        // api.sendSignal("GEAR_MODE", static_cast<int64_t>(3)); // D模式
+        // 明确指定整数类型
+        api.sendSignal("CURRENT_GEAR", static_cast<int64_t>(gear));
+        api.sendSignal("GEAR_MODE", static_cast<int64_t>(3)); // D模式
         
-        // // 更新燃油系统
-        // api.sendSignal("FUEL_LEVEL", 80 - speed/5);
-        // api.sendSignal("FUEL_CONSUMPTION", 5 + 5 * sin(speed/10));
+        // 更新燃油系统
+        api.sendSignal("FUEL_LEVEL", 80 - speed/5);
+        api.sendSignal("FUEL_CONSUMPTION", 5 + 5 * sin(speed/10));
         
         // 增加速度
         {

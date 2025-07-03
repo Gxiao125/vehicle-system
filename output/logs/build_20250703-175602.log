@@ -1,0 +1,123 @@
+[1;33mGenerating CMake toolchain file...[0m
+[0;32mToolchain file created: /home/xiao/project/vehicle-system/Middleware/toolchain.cmake[0m
+[1;33mBuilding Applications...[0m
+-- Configuring body_control application
+-- Middleware include path: /home/xiao/project/vehicle-system/output/middleware/include
+-- Middleware library: /home/xiao/project/vehicle-system/output/middleware/lib/libVehicleMiddleware.a
+-- Configuring powertrain application
+-- Middleware include path: /home/xiao/project/vehicle-system/output/middleware/include
+-- Middleware library: /home/xiao/project/vehicle-system/output/middleware/lib/libVehicleMiddleware.a
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/xiao/project/vehicle-system/app/build
+[ 66%] Built target body_control
+[ 50%] Building CXX object dashboard/CMakeFiles/dashboard.dir/dashboard.cpp.o
+[ 83%] Built target powertrain
+/home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp: In function ‘void displayDashboardOnScreen()’:
+/home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:382:78: error: no match for ‘operator-’ (operand types are ‘std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >’ and ‘std::chrono::time_point<std::chrono::_V2::steady_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >’)
+     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_time).count();
+                                                                              ^
+/home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:382:78: note: candidates are:
+In file included from /home/xiao/project/vehicle-system/output/middleware/include/SharedMemoryPool.h:11:0,
+                 from /home/xiao/project/vehicle-system/output/middleware/include/VehicleCommunicationAPI.h:3,
+                 from /home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:1:
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/chrono:650:7: note: template<class _Clock, class _Dur1, class _Dur2> constexpr typename std::common_type<_Duration1, _Duration2>::type std::chrono::operator-(const std::chrono::time_point<_Clock, _Duration1>&, const std::chrono::time_point<_Clock, _Duration2>&)
+       operator-(const time_point<_Clock, _Dur1>& __lhs,
+       ^
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/chrono:650:7: note:   template argument deduction/substitution failed:
+/home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:382:80: note:   deduced conflicting types for parameter ‘_Clock’ (‘std::chrono::_V2::system_clock’ and ‘std::chrono::_V2::steady_clock’)
+     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_time).count();
+                                                                                ^
+In file included from /home/xiao/project/vehicle-system/output/middleware/include/SharedMemoryPool.h:11:0,
+                 from /home/xiao/project/vehicle-system/output/middleware/include/VehicleCommunicationAPI.h:3,
+                 from /home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:1:
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/chrono:639:7: note: template<class _Clock, class _Dur1, class _Rep2, class _Period2> constexpr std::chrono::time_point<_Clock, typename std::common_type<_Dur1, std::chrono::duration<_Rep2, _Period2> >::type> std::chrono::operator-(const std::chrono::time_point<_Clock, _Duration1>&, const std::chrono::duration<_Rep2, _Period2>&)
+       operator-(const time_point<_Clock, _Dur1>& __lhs,
+       ^
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/chrono:639:7: note:   template argument deduction/substitution failed:
+/home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:382:80: note:   ‘std::chrono::time_point<std::chrono::_V2::steady_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >’ is not derived from ‘const std::chrono::duration<_Rep2, _Period2>’
+     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_time).count();
+                                                                                ^
+In file included from /home/xiao/project/vehicle-system/output/middleware/include/SharedMemoryPool.h:11:0,
+                 from /home/xiao/project/vehicle-system/output/middleware/include/VehicleCommunicationAPI.h:3,
+                 from /home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:1:
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/chrono:393:7: note: template<class _Rep1, class _Period1, class _Rep2, class _Period2> constexpr typename std::common_type<std::chrono::duration<_Rep1, _Period1>, std::chrono::duration<_Rep2, _Period2> >::type std::chrono::operator-(const std::chrono::duration<_Rep1, _Period1>&, const std::chrono::duration<_Rep2, _Period2>&)
+       operator-(const duration<_Rep1, _Period1>& __lhs,
+       ^
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/chrono:393:7: note:   template argument deduction/substitution failed:
+/home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:382:80: note:   ‘std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >’ is not derived from ‘const std::chrono::duration<_Rep1, _Period1>’
+     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_time).count();
+                                                                                ^
+In file included from /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/vector:65:0,
+                 from /home/xiao/project/vehicle-system/output/middleware/include/CanMessageParser.h:2,
+                 from /home/xiao/project/vehicle-system/output/middleware/include/VehicleCommunicationAPI.h:2,
+                 from /home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:1:
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/stl_bvector.h:208:3: note: std::ptrdiff_t std::operator-(const std::_Bit_iterator_base&, const std::_Bit_iterator_base&)
+   operator-(const _Bit_iterator_base& __x, const _Bit_iterator_base& __y)
+   ^
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/stl_bvector.h:208:3: note:   no known conversion for argument 1 from ‘std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >’ to ‘const std::_Bit_iterator_base&’
+In file included from /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/stl_algobase.h:67:0,
+                 from /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/vector:60,
+                 from /home/xiao/project/vehicle-system/output/middleware/include/CanMessageParser.h:2,
+                 from /home/xiao/project/vehicle-system/output/middleware/include/VehicleCommunicationAPI.h:2,
+                 from /home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:1:
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/stl_iterator.h:1128:5: note: template<class _Iterator> decltype ((__x.base() - __y.base())) std::operator-(const std::move_iterator<_Iterator>&, const std::move_iterator<_Iterator>&)
+     operator-(const move_iterator<_Iterator>& __x,
+     ^
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/stl_iterator.h:1128:5: note:   template argument deduction/substitution failed:
+/home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:382:80: note:   ‘std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >’ is not derived from ‘const std::move_iterator<_Iterator>’
+     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_time).count();
+                                                                                ^
+In file included from /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/stl_algobase.h:67:0,
+                 from /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/vector:60,
+                 from /home/xiao/project/vehicle-system/output/middleware/include/CanMessageParser.h:2,
+                 from /home/xiao/project/vehicle-system/output/middleware/include/VehicleCommunicationAPI.h:2,
+                 from /home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:1:
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/stl_iterator.h:1121:5: note: template<class _IteratorL, class _IteratorR> decltype ((__x.base() - __y.base())) std::operator-(const std::move_iterator<_Iterator>&, const std::move_iterator<_IteratorR>&)
+     operator-(const move_iterator<_IteratorL>& __x,
+     ^
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/stl_iterator.h:1121:5: note:   template argument deduction/substitution failed:
+/home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:382:80: note:   ‘std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >’ is not derived from ‘const std::move_iterator<_Iterator>’
+     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_time).count();
+                                                                                ^
+In file included from /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/stl_algobase.h:67:0,
+                 from /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/vector:60,
+                 from /home/xiao/project/vehicle-system/output/middleware/include/CanMessageParser.h:2,
+                 from /home/xiao/project/vehicle-system/output/middleware/include/VehicleCommunicationAPI.h:2,
+                 from /home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:1:
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/stl_iterator.h:380:5: note: template<class _IteratorL, class _IteratorR> decltype ((__y.base() - __x.base())) std::operator-(const std::reverse_iterator<_Iterator>&, const std::reverse_iterator<_IteratorR>&)
+     operator-(const reverse_iterator<_IteratorL>& __x,
+     ^
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/stl_iterator.h:380:5: note:   template argument deduction/substitution failed:
+/home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:382:80: note:   ‘std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >’ is not derived from ‘const std::reverse_iterator<_Iterator>’
+     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_time).count();
+                                                                                ^
+In file included from /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/stl_algobase.h:67:0,
+                 from /home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/vector:60,
+                 from /home/xiao/project/vehicle-system/output/middleware/include/CanMessageParser.h:2,
+                 from /home/xiao/project/vehicle-system/output/middleware/include/VehicleCommunicationAPI.h:2,
+                 from /home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:1:
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/stl_iterator.h:328:5: note: template<class _Iterator> typename std::reverse_iterator<_Iterator>::difference_type std::operator-(const std::reverse_iterator<_Iterator>&, const std::reverse_iterator<_Iterator>&)
+     operator-(const reverse_iterator<_Iterator>& __x,
+     ^
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/bits/stl_iterator.h:328:5: note:   template argument deduction/substitution failed:
+/home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:382:80: note:   ‘std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >’ is not derived from ‘const std::reverse_iterator<_Iterator>’
+     auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_time).count();
+                                                                                ^
+/home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:383:15: error: no match for ‘operator=’ (operand types are ‘std::chrono::time_point<std::chrono::_V2::steady_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >’ and ‘std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >’)
+     last_time = now;
+               ^
+/home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:383:15: note: candidates are:
+In file included from /home/xiao/project/vehicle-system/output/middleware/include/SharedMemoryPool.h:11:0,
+                 from /home/xiao/project/vehicle-system/output/middleware/include/VehicleCommunicationAPI.h:3,
+                 from /home/xiao/project/vehicle-system/app/dashboard/dashboard.cpp:1:
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/chrono:546:14: note: std::chrono::time_point<std::chrono::_V2::steady_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >& std::chrono::time_point<std::chrono::_V2::steady_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >::operator=(const std::chrono::time_point<std::chrono::_V2::steady_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >&)
+       struct time_point
+              ^
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/chrono:546:14: note:   no known conversion for argument 1 from ‘std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >’ to ‘const std::chrono::time_point<std::chrono::_V2::steady_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >&’
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/chrono:546:14: note: std::chrono::time_point<std::chrono::_V2::steady_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >& std::chrono::time_point<std::chrono::_V2::steady_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >::operator=(std::chrono::time_point<std::chrono::_V2::steady_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >&&)
+/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/arm-linux-gnueabihf/include/c++/4.9.4/chrono:546:14: note:   no known conversion for argument 1 from ‘std::chrono::time_point<std::chrono::_V2::system_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >’ to ‘std::chrono::time_point<std::chrono::_V2::steady_clock, std::chrono::duration<long long int, std::ratio<1ll, 1000000000ll> > >&&’
+make[2]: *** [dashboard/CMakeFiles/dashboard.dir/build.make:76: dashboard/CMakeFiles/dashboard.dir/dashboard.cpp.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:213: dashboard/CMakeFiles/dashboard.dir/all] Error 2
+make: *** [Makefile:136: all] Error 2
+[0;31mError: Applications build failed[0m

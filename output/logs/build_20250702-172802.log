@@ -1,0 +1,35 @@
+[1;33mBuilding CAN DMA Buffer driver...[0m
+make: Entering directory '/home/xiao/project/vehicle-system/kernel/linux-imx-rel_imx_4.1.15_2.1.0_ga_alientek'
+  CC [M]  /home/xiao/project/vehicle-system/kernel_transport/can_dma_buffer/flexcan_dma.o
+/home/xiao/project/vehicle-system/kernel_transport/can_dma_buffer/flexcan_dma.c:13:0: warning: "CIRC_CNT" redefined
+ #define CIRC_CNT(head, tail, size) (((head) - (tail)) & ((size) - 1))
+ ^
+In file included from /home/xiao/project/vehicle-system/kernel_transport/can_dma_buffer/../include/flexcan_dma.h:17:0,
+                 from /home/xiao/project/vehicle-system/kernel_transport/can_dma_buffer/flexcan_dma.c:1:
+include/linux/circ_buf.h:15:0: note: this is the location of the previous definition
+ #define CIRC_CNT(head,tail,size) (((head) - (tail)) & ((size)-1))
+ ^
+/home/xiao/project/vehicle-system/kernel_transport/can_dma_buffer/flexcan_dma.c:14:0: warning: "CIRC_SPACE" redefined
+ #define CIRC_SPACE(head, tail, size) CIRC_CNT((tail), (head) + 1, (size))
+ ^
+In file included from /home/xiao/project/vehicle-system/kernel_transport/can_dma_buffer/../include/flexcan_dma.h:17:0,
+                 from /home/xiao/project/vehicle-system/kernel_transport/can_dma_buffer/flexcan_dma.c:1:
+include/linux/circ_buf.h:20:0: note: this is the location of the previous definition
+ #define CIRC_SPACE(head,tail,size) CIRC_CNT((tail),((head)+1),(size))
+ ^
+/home/xiao/project/vehicle-system/kernel_transport/can_dma_buffer/flexcan_dma.c:175:25: warning: initialization from incompatible pointer type
+     .begin_cpu_access = flexcan_dma_buf_begin_cpu_access,
+                         ^
+/home/xiao/project/vehicle-system/kernel_transport/can_dma_buffer/flexcan_dma.c:175:25: warning: (near initialization for ‘flexcan_dmabuf_ops.begin_cpu_access’)
+/home/xiao/project/vehicle-system/kernel_transport/can_dma_buffer/flexcan_dma.c: In function ‘flexcan_ioctl’:
+/home/xiao/project/vehicle-system/kernel_transport/can_dma_buffer/flexcan_dma.c:247:17: error: implicit declaration of function ‘CIRC_CNT_ME’ [-Werror=implicit-function-declaration]
+                 avail = CIRC_CNT_ME(head, tail, DMA_POOL_SIZE);
+                 ^
+/home/xiao/project/vehicle-system/kernel_transport/can_dma_buffer/flexcan_dma.c:367:31: warning: array subscript is below array bounds [-Warray-bounds]
+                     return fds[i];
+                               ^
+cc1: some warnings being treated as errors
+make[1]: *** [scripts/Makefile.build:265: /home/xiao/project/vehicle-system/kernel_transport/can_dma_buffer/flexcan_dma.o] Error 1
+make: *** [Makefile:1387: _module_/home/xiao/project/vehicle-system/kernel_transport/can_dma_buffer] Error 2
+make: Leaving directory '/home/xiao/project/vehicle-system/kernel/linux-imx-rel_imx_4.1.15_2.1.0_ga_alientek'
+[0;31mError: Driver build failed[0m
