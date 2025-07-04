@@ -244,23 +244,32 @@ const uint8_t font8x8[95][8] = {
 
 // 绘制字符
 void drawChar(int x, int y, char c, uint32_t color) {
-    if (c < 32 || c > 126) return;
+    if (c < 32 || c > 126) return; // 只处理可打印字符
     
     int char_index = c - 32;
+    if (char_index < 0 || char_index >= 95) return;
+    
     const uint8_t* char_data = font8x8[char_index];
     
-    for (int row = 0; row < 8; row++) {
-        for (int col = 0; col < 8; col++) {
-            if (char_data[row] & (1 << (7 - col))) {
-                drawPixel(x + col, y + row, color);
+    // 逆时针旋转90度绘制
+    for (int orig_row = 0; orig_row < 8; orig_row++) {
+        for (int orig_col = 0; orig_col < 8; orig_col++) {
+            // 检查原始点阵中的像素
+            if (char_data[orig_row] & (1 << (7 - orig_col))) {
+                // 应用逆时针90度旋转：
+                // 新的x坐标 = 原始行号
+                // 新的y坐标 = 7 - 原始列号
+                drawPixel(x + orig_row, y + (7 - orig_col), color);
             }
         }
     }
 }
 // 绘制文本
+
 void drawText(int x, int y, const std::string& text, uint32_t color) {
+    // 水平排列字符
     for (size_t i = 0; i < text.size(); i++) {
-        drawChar(x + i * 9, y, text[i], color);  // 水平排列字符
+        drawChar(x + i * 9, y, text[i], color);
     }
 }
 
