@@ -100,11 +100,14 @@ void close_framebuffer() {
 void signalHandler(const std::string& name, double value, const std::string& unit) {
     std::lock_guard<std::mutex> lock(g_data_mutex);
     g_signal_values[name] = {value, unit};
+    std::cout <<"Received signal: " << name 
+              << " = " << value << " " << unit;
+    std::cout << std::endl;
 }
 
 void errorHandler(uint32_t can_id, const std::string& error_msg) {
-    std::cerr << "[Dashboard] ERROR (ID:0x" << std::hex << can_id 
-              << "): " << error_msg << std::dec << std::endl;
+    // std::cerr << "[Dashboard] ERROR (ID:0x" << std::hex << can_id 
+    //           << "): " << error_msg << std::dec << std::endl;
 }
 
 // 档位值转换

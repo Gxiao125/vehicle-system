@@ -1,0 +1,54 @@
+[1;33mGenerating CMake toolchain file...[0m
+[0;32mToolchain file created: /home/xiao/project/vehicle-system/Middleware/toolchain.cmake[0m
+[1;33mBuilding Applications...[0m
+-- Configuring body_control application
+-- Middleware include path: /home/xiao/project/vehicle-system/output/middleware/include
+-- Middleware library: /home/xiao/project/vehicle-system/output/middleware/lib/libVehicleMiddleware.a
+-- Configuring powertrain application
+-- Middleware include path: /home/xiao/project/vehicle-system/output/middleware/include
+-- Middleware library: /home/xiao/project/vehicle-system/output/middleware/lib/libVehicleMiddleware.a
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/xiao/project/vehicle-system/app/build
+[ 50%] Building CXX object brake_system/CMakeFiles/powertrain.dir/powertrain.cpp.o
+[ 50%] Building CXX object dashboard/CMakeFiles/dashboard.dir/dashboard.cpp.o
+[ 66%] Built target body_control
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp: In function ‘void sendEngineData(VehicleCommunicationAPI&, double, double, double, double)’:
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:95:9: error: ‘class VehicleCommunicationAPI’ has no member named ‘sendMessage’
+     api.sendMessage(0x64, data, sizeof(data));
+         ^
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp: In function ‘void sendGearboxData(VehicleCommunicationAPI&, int, int)’:
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:100:20: error: ‘clamp’ is not a member of ‘std’
+     current_gear = std::clamp(current_gear, 0, 7);
+                    ^
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:101:17: error: ‘clamp’ is not a member of ‘std’
+     gear_mode = std::clamp(gear_mode, 0, 3);
+                 ^
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:108:9: error: ‘class VehicleCommunicationAPI’ has no member named ‘sendMessage’
+     api.sendMessage(0x65, data, sizeof(data));
+         ^
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp: In function ‘void sendFuelSystemData(VehicleCommunicationAPI&, double, double)’:
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:126:9: error: ‘class VehicleCommunicationAPI’ has no member named ‘sendMessage’
+     api.sendMessage(0x66, data, sizeof(data));
+         ^
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp: In function ‘int main()’:
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:147:20: error: could not convert ‘api.VehicleCommunicationAPI::start()’ from ‘void’ to ‘bool’
+     if (!api.start()) {
+                    ^
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:147:20: error: in argument to unary !
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:215:21: error: ‘clamp’ is not a member of ‘std’
+             speed = std::clamp(speed, 0.0, max_speed);
+                     ^
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:235:19: error: ‘clamp’ is not a member of ‘std’
+             rpm = std::clamp(rpm, idle_rpm, max_rpm);
+                   ^
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:239:28: error: ‘clamp’ is not a member of ‘std’
+             coolant_temp = std::clamp(coolant_temp, 70.0, 110.0);
+                            ^
+make[2]: *** [brake_system/CMakeFiles/powertrain.dir/build.make:76: brake_system/CMakeFiles/powertrain.dir/powertrain.cpp.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:187: brake_system/CMakeFiles/powertrain.dir/all] Error 2
+make[1]: *** Waiting for unfinished jobs....
+[ 83%] Linking CXX executable dashboard
+[ 83%] Built target dashboard
+make: *** [Makefile:136: all] Error 2
+[0;31mError: Applications build failed[0m

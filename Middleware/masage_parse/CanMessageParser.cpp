@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <iostream>
 #include <algorithm>
+#include <iomanip>  // 添加用于十六进制格式化的头文件
 
 void CanMessageParser::registerMessage(const MessageDefinition& definition) {
     message_definitions_[definition.can_id] = definition;
@@ -112,26 +113,42 @@ uint64_t CanMessageParser::extractBits(const std::vector<uint8_t>& data,
 
 uint64_t CanMessageParser::convertToRaw(double physical_value, const SignalDefinition& signal) const {
     // 应用反向转换: raw = (physical_value - offset) / scale
-    double raw_value = (physical_value - signal.offset) / signal.scale;
+    double raw_value_double = (physical_value - signal.offset) / signal.scale;
     
-    // 边界检查
-    if (raw_value < signal.min) raw_value = signal.min;
-    if (raw_value > signal.max) raw_value = signal.max;
+    // 调试输出 - 显示计算过程
+    std::cout << "  [convertToRaw] signal: " << signal.name << "\n"
+              << "    physical_value: " << physical_value << "\n"
+              << "    offset: " << signal.offset << "\n"
+              << "    scale: " << signal.scale << "\n"
+              << "    raw_value_double: " << raw_value_double << std::endl;
     
     // 四舍五入
-    int64_t int_value = static_cast<int64_t>(std::round(raw_value));
+    int64_t int_value = static_cast<int64_t>(std::round(raw_value_double));
     
     // 处理有符号值
+    uint64_t raw_value;
     if (signal.is_signed) {
         // 应用位掩码
         uint64_t mask = (1ULL << signal.length) - 1;
-        return static_cast<uint64_t>(int_value) & mask;
+        raw_value = static_cast<uint64_t>(int_value) & mask;
+        
+        // 调试输出
+        std::cout << "    Signed signal | Mask: 0x" << std::hex << mask << std::dec
+                  << " | Raw value: " << raw_value << std::endl;
     } else {
-        if (int_value < 0) int_value = 0; // 无符号值不能为负
-        return static_cast<uint64_t>(int_value);
+        if (int_value < 0) {
+            // 调试输出
+            std::cout << "    Unsigned signal | Negative value clamped to 0" << std::endl;
+            int_value = 0;
+        }
+        raw_value = static_cast<uint64_t>(int_value);
+        
+        // 调试输出
+        std::cout << "    Unsigned signal | Raw value: " << raw_value << std::endl;
     }
+    
+    return raw_value;
 }
-
 void CanMessageParser::setBits(std::vector<uint8_t>& data,
                               uint16_t start_bit,
                               uint8_t length,
@@ -188,6 +205,12 @@ std::vector<uint8_t> CanMessageParser::encode(uint32_t can_id,
 
     const MessageDefinition& def = it->second;
     std::vector<uint8_t> data(def.dlc, 0); // 初始化数据向量，长度为 DLC
+    
+    // 调试：打印消息信息
+    std::cout << "Encoding message: CAN_ID=0x" << std::hex << can_id << std::dec
+              << ", Name=" << def.name
+              << ", DLC=" << def.dlc
+              << std::endl;
 
     for (const auto& signal_entry : signals) {
         const std::string& signal_name = signal_entry.first;
@@ -220,11 +243,33 @@ std::vector<uint8_t> CanMessageParser::encode(uint32_t can_id,
         }
 
         uint64_t raw_value = convertToRaw(physical_value, signal_def);
+        
+        // 调试：打印信号转换信息
+        std::cout << "  Signal: " << signal_name
+                  << " | Physical: " << physical_value
+                  << " | Raw: " << raw_value
+                  << " | Start bit: " << signal_def.start_bit
+                  << " | Length: " << signal_def.length
+                  << " | Byte order: " << (signal_def.byte_order == ByteOrder::_BIG_ENDIAN ? "BIG" : "LITTLE")
+                  << " | Scale: " << signal_def.scale
+                  << " | Offset: " << signal_def.offset
+                  << " | Signed: " << (signal_def.is_signed ? "Yes" : "No")
+                  << std::endl;
+
         setBits(data, signal_def.start_bit, signal_def.length, raw_value, signal_def.byte_order);
     }
 
+    // 调试：打印编码后的数据
+    std::cout << "  Encoded data: ";
+    for (uint8_t byte : data) {
+        std::cout << std::hex << std::setw(2) << std::setfill('0') 
+                  << static_cast<int>(byte) << " ";
+    }
+    std::cout << std::dec << std::endl;
+
     return data;
 }
+
 
 const std::unordered_map<uint32_t, CanMessageParser::MessageDefinition>& 
 CanMessageParser::getMessageDefinitions() const {

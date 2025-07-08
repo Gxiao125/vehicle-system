@@ -27,8 +27,8 @@ void lightingHandler(const std::string& signal_name, double value, const std::st
 
 // 错误处理函数
 void errorHandler(uint32_t can_id, const std::string& error_msg) {
-    std::cerr << "[BodyControl] ERROR (ID:0x" << std::hex << can_id 
-              << "): " << error_msg << std::dec << std::endl;
+    // std::cerr << "[BodyControl] ERROR (ID:0x" << std::hex << can_id 
+    //           << "): " << error_msg << std::dec << std::endl;
 }
 
 int main() {
@@ -37,7 +37,6 @@ int main() {
     // 加载 DBC 文件
     api.loadMessageDefinitions("/app/body_control/BodyControl.dbc");
     
-    // 修正 lambda 表达式 - 使用正确的参数类型
     api.registerSignalHandler("DRIVER_DOOR", [](const std::string& n, double v, const std::string& u) {
         doorStatusHandler(n, v, u);
     });

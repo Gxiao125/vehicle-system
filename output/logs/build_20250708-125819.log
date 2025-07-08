@@ -1,0 +1,28 @@
+[1;33mGenerating CMake toolchain file...[0m
+[0;32mToolchain file created: /home/xiao/project/vehicle-system/Middleware/toolchain.cmake[0m
+[1;33mBuilding Applications...[0m
+-- Configuring body_control application
+-- Middleware include path: /home/xiao/project/vehicle-system/output/middleware/include
+-- Middleware library: /home/xiao/project/vehicle-system/output/middleware/lib/libVehicleMiddleware.a
+-- Configuring powertrain application
+-- Middleware include path: /home/xiao/project/vehicle-system/output/middleware/include
+-- Middleware library: /home/xiao/project/vehicle-system/output/middleware/lib/libVehicleMiddleware.a
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/xiao/project/vehicle-system/app/build
+[ 50%] Built target body_control
+[ 33%] Building CXX object brake_system/CMakeFiles/powertrain.dir/powertrain.cpp.o
+[ 83%] Built target dashboard
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp: In function ‘T clamp_value(T, T, T)’:
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:63:12: error: ‘clamp’ is not a member of ‘std’
+     return std::clamp(value, min_val, max_val);
+            ^
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp: In function ‘int main()’:
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:146:20: error: could not convert ‘api.VehicleCommunicationAPI::start()’ from ‘void’ to ‘bool’
+     if (!api.start()) {
+                    ^
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:146:20: error: in argument to unary !
+make[2]: *** [brake_system/CMakeFiles/powertrain.dir/build.make:76: brake_system/CMakeFiles/powertrain.dir/powertrain.cpp.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:187: brake_system/CMakeFiles/powertrain.dir/all] Error 2
+make: *** [Makefile:136: all] Error 2
+[0;31mError: Applications build failed[0m

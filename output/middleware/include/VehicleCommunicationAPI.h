@@ -93,6 +93,9 @@ public:
      */
     bool sendRawMessage(uint32_t can_id, const std::vector<uint8_t>& data);
 
+
+    bool sendMultipleSignals(uint32_t can_id, const std::unordered_map<std::string, SignalValue>& signals);
+
 private:
     /**
      * 共享内存读取线程函数

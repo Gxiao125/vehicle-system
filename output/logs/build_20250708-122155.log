@@ -1,0 +1,30 @@
+[1;33mGenerating CMake toolchain file...[0m
+[0;32mToolchain file created: /home/xiao/project/vehicle-system/Middleware/toolchain.cmake[0m
+[1;33mBuilding Applications...[0m
+-- Configuring body_control application
+-- Middleware include path: /home/xiao/project/vehicle-system/output/middleware/include
+-- Middleware library: /home/xiao/project/vehicle-system/output/middleware/lib/libVehicleMiddleware.a
+-- Configuring powertrain application
+-- Middleware include path: /home/xiao/project/vehicle-system/output/middleware/include
+-- Middleware library: /home/xiao/project/vehicle-system/output/middleware/lib/libVehicleMiddleware.a
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/xiao/project/vehicle-system/app/build
+[ 66%] Built target dashboard
+[ 83%] Building CXX object brake_system/CMakeFiles/powertrain.dir/powertrain.cpp.o
+[ 66%] Built target body_control
+[100%] Linking CXX executable powertrain
+[100%] Built target powertrain
+[ 33%] Built target body_control
+[ 66%] Built target powertrain
+[100%] Built target dashboard
+Install the project...
+-- Install configuration: "Release"
+-- Up-to-date: /home/xiao/project/vehicle-system/output/applications/bin/body_control
+-- Up-to-date: /home/xiao/project/vehicle-system/output/applications/body_control/BodyControl.dbc
+-- Installing: /home/xiao/project/vehicle-system/output/applications/bin/powertrain
+-- Up-to-date: /home/xiao/project/vehicle-system/output/applications/brake_system/Powertrain.dbc
+-- Up-to-date: /home/xiao/project/vehicle-system/output/applications/bin/dashboard
+-- Up-to-date: /home/xiao/project/vehicle-system/output/applications/dashboard/Dashboard.dbc
+[0;32mApplications build completed.[0m
+[0;32mApplications deployed to /nfsroot/app[0m

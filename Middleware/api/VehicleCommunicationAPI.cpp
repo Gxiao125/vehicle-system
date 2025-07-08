@@ -13,6 +13,7 @@
 #include <atomic>
 #include <thread>
 #include <cstring>
+#include <iomanip>
 // 共享内存消息结构
 
 
@@ -106,6 +107,13 @@ bool VehicleCommunicationAPI::sendRawMessage(uint32_t can_id, const std::vector<
         return false;
     }
     
+    std::ostringstream hex_data;
+    hex_data << "0x" << std::hex << std::setw(8) << std::setfill('0') << can_id << ": ";
+    for (const auto& byte : data) {
+        hex_data << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(byte);
+    }
+    std::cout << hex_data.str() << std::endl;
+
     // 使用共享内存池接口写入发送通道
     if (!shm_pool_->writeToSendChannel(can_id, data)) {
         handleError(can_id, "Failed to write to send channel");
@@ -115,6 +123,18 @@ bool VehicleCommunicationAPI::sendRawMessage(uint32_t can_id, const std::vector<
     return true;
 }
 
+bool VehicleCommunicationAPI::sendMultipleSignals(uint32_t can_id, const std::unordered_map<std::string, SignalValue>& signals) {
+    try {
+        // 使用消息解析器编码所有信号
+        auto data = message_parser_.encode(can_id, signals);
+        
+        // 发送完整的CAN消息
+        return sendRawMessage(can_id, data);
+    } catch (const std::exception& e) {
+        handleError(can_id, "Failed to send multiple signals: " + std::string(e.what()));
+        return false;
+    }
+}
 void VehicleCommunicationAPI::shmReaderThreadFunc() {
     while (running_) {
         uint32_t can_id;

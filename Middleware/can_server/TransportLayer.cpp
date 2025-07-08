@@ -4,7 +4,7 @@
 #include <iomanip>
 
 
-#define _DBUG_ 0
+#define _DBUG_ 1
 TransportLayer::TransportLayer(FlexCANController& controller, 
                              const std::string& shm_name,
                              size_t shm_pool_size)

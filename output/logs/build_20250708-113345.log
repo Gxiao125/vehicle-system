@@ -1,0 +1,39 @@
+[1;33mGenerating CMake toolchain file...[0m
+[0;32mToolchain file created: /home/xiao/project/vehicle-system/Middleware/toolchain.cmake[0m
+[1;33mBuilding Applications...[0m
+-- Configuring body_control application
+-- Middleware include path: /home/xiao/project/vehicle-system/output/middleware/include
+-- Middleware library: /home/xiao/project/vehicle-system/output/middleware/lib/libVehicleMiddleware.a
+-- Configuring powertrain application
+-- Middleware include path: /home/xiao/project/vehicle-system/output/middleware/include
+-- Middleware library: /home/xiao/project/vehicle-system/output/middleware/lib/libVehicleMiddleware.a
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/xiao/project/vehicle-system/app/build
+[ 33%] Building CXX object brake_system/CMakeFiles/powertrain.dir/powertrain.cpp.o
+[ 50%] Built target body_control
+[ 83%] Built target dashboard
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\345’ in program
+ 关键修改说明
+ ^
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\205’ in program
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\263’ in program
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\351’ in program
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\224’ in program
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\256’ in program
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\344’ in program
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\277’ in program
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\256’ in program
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\346’ in program
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\224’ in program
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\271’ in program
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\350’ in program
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\257’ in program
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\264’ in program
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\346’ in program
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\230’ in program
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:282:1: error: stray ‘\216’ in program
+make[2]: *** [brake_system/CMakeFiles/powertrain.dir/build.make:76: brake_system/CMakeFiles/powertrain.dir/powertrain.cpp.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:187: brake_system/CMakeFiles/powertrain.dir/all] Error 2
+make: *** [Makefile:136: all] Error 2
+[0;31mError: Applications build failed[0m

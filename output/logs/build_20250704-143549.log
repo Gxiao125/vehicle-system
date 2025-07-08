@@ -1,0 +1,74 @@
+[1;33mGenerating CMake toolchain file...[0m
+[0;32mToolchain file created: /home/xiao/project/vehicle-system/Middleware/toolchain.cmake[0m
+[1;33mBuilding Applications...[0m
+-- Configuring body_control application
+-- Middleware include path: /home/xiao/project/vehicle-system/output/middleware/include
+-- Middleware library: /home/xiao/project/vehicle-system/output/middleware/lib/libVehicleMiddleware.a
+-- Configuring powertrain application
+-- Middleware include path: /home/xiao/project/vehicle-system/output/middleware/include
+-- Middleware library: /home/xiao/project/vehicle-system/output/middleware/lib/libVehicleMiddleware.a
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/xiao/project/vehicle-system/app/build
+[ 66%] Built target dashboard
+[ 66%] Built target body_control
+[ 83%] Building CXX object brake_system/CMakeFiles/powertrain.dir/powertrain.cpp.o
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp: In function ‘int main()’:
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:232:50: error: conversion from ‘uint16_t {aka short unsigned int}’ to ‘VehicleCommunicationAPI::SignalValue {aka CanMessageParser::SignalValue}’ is ambiguous
+             api.sendSignal("SPEED_RAW", speed_raw);
+                                                  ^
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:227:22: note: candidates are:
+             uint16_t speed_raw = static_cast<uint16_t>(speed / 0.01);
+                      ^
+In file included from /home/xiao/project/vehicle-system/output/middleware/include/VehicleCommunicationAPI.h:2:0,
+                 from /home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:1:
+/home/xiao/project/vehicle-system/output/middleware/include/CanMessageParser.h:45:9: note: CanMessageParser::SignalValue::SignalValue(double)
+         SignalValue(double v) : type(DOUBLE), double_val(v) {}
+         ^
+/home/xiao/project/vehicle-system/output/middleware/include/CanMessageParser.h:44:9: note: CanMessageParser::SignalValue::SignalValue(int64_t)
+         SignalValue(int64_t v) : type(INT), int_val(v) {}
+         ^
+In file included from /home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:1:0:
+/home/xiao/project/vehicle-system/output/middleware/include/VehicleCommunicationAPI.h:77:10: note: initializing argument 2 of ‘bool VehicleCommunicationAPI::sendSignal(const string&, VehicleCommunicationAPI::SignalValue)’
+     bool sendSignal(const std::string& signal_name, SignalValue value);
+          ^
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:233:46: error: conversion from ‘uint16_t {aka short unsigned int}’ to ‘VehicleCommunicationAPI::SignalValue {aka CanMessageParser::SignalValue}’ is ambiguous
+             api.sendSignal("RPM_RAW", rpm_raw);
+                                              ^
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:228:22: note: candidates are:
+             uint16_t rpm_raw = static_cast<uint16_t>(rpm / 0.125);
+                      ^
+In file included from /home/xiao/project/vehicle-system/output/middleware/include/VehicleCommunicationAPI.h:2:0,
+                 from /home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:1:
+/home/xiao/project/vehicle-system/output/middleware/include/CanMessageParser.h:45:9: note: CanMessageParser::SignalValue::SignalValue(double)
+         SignalValue(double v) : type(DOUBLE), double_val(v) {}
+         ^
+/home/xiao/project/vehicle-system/output/middleware/include/CanMessageParser.h:44:9: note: CanMessageParser::SignalValue::SignalValue(int64_t)
+         SignalValue(int64_t v) : type(INT), int_val(v) {}
+         ^
+In file included from /home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:1:0:
+/home/xiao/project/vehicle-system/output/middleware/include/VehicleCommunicationAPI.h:77:10: note: initializing argument 2 of ‘bool VehicleCommunicationAPI::sendSignal(const string&, VehicleCommunicationAPI::SignalValue)’
+     bool sendSignal(const std::string& signal_name, SignalValue value);
+          ^
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:234:60: error: conversion from ‘uint8_t {aka unsigned char}’ to ‘VehicleCommunicationAPI::SignalValue {aka CanMessageParser::SignalValue}’ is ambiguous
+             api.sendSignal("FUEL_LEVEL_RAW", fuel_level_raw);
+                                                            ^
+/home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:229:21: note: candidates are:
+             uint8_t fuel_level_raw = static_cast<uint8_t>(fuel_level / 0.5);
+                     ^
+In file included from /home/xiao/project/vehicle-system/output/middleware/include/VehicleCommunicationAPI.h:2:0,
+                 from /home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:1:
+/home/xiao/project/vehicle-system/output/middleware/include/CanMessageParser.h:45:9: note: CanMessageParser::SignalValue::SignalValue(double)
+         SignalValue(double v) : type(DOUBLE), double_val(v) {}
+         ^
+/home/xiao/project/vehicle-system/output/middleware/include/CanMessageParser.h:44:9: note: CanMessageParser::SignalValue::SignalValue(int64_t)
+         SignalValue(int64_t v) : type(INT), int_val(v) {}
+         ^
+In file included from /home/xiao/project/vehicle-system/app/brake_system/powertrain.cpp:1:0:
+/home/xiao/project/vehicle-system/output/middleware/include/VehicleCommunicationAPI.h:77:10: note: initializing argument 2 of ‘bool VehicleCommunicationAPI::sendSignal(const string&, VehicleCommunicationAPI::SignalValue)’
+     bool sendSignal(const std::string& signal_name, SignalValue value);
+          ^
+make[2]: *** [brake_system/CMakeFiles/powertrain.dir/build.make:76: brake_system/CMakeFiles/powertrain.dir/powertrain.cpp.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:187: brake_system/CMakeFiles/powertrain.dir/all] Error 2
+make: *** [Makefile:136: all] Error 2
+[0;31mError: Applications build failed[0m
