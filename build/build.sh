@@ -6,6 +6,7 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m'
+
 # 初始化环境
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 PROJECT_ROOT=$(realpath "$SCRIPT_DIR/..")
@@ -20,10 +21,13 @@ source "$PROJECT_ROOT/build/config.env"
 export ARCH=arm
 export CROSS_COMPILE=arm-linux-gnueabihf-
 
-
 # 组件版本
 UBOOT_VERSION="2015.04"
 KERNEL_VERSION="4.1.15"
+
+# 部署路径
+NFS_PATH=""
+TFTP_PATH=""
 
 # 初始化日志系统
 init_logging() {
@@ -133,8 +137,6 @@ build_drivers() {
     popd >/dev/null
     
     color_echo "${GREEN}" "Driver build completed."
-
-    # sudo cp -f  "$output_dir"/*.ko  /nfsroot/lib/modules/4.1.15/
 }
 
 # 编译Middleware应用
@@ -162,24 +164,6 @@ build_middleware() {
     popd >/dev/null
 
     color_echo "${GREEN}" "Middleware build completed."
-
-    # 确保目标目录存在
-    sudo mkdir -p /nfsroot/usr/local/bin
-    sudo mkdir -p /nfsroot/usr/local/include
-    sudo mkdir -p /nfsroot/usr/local/lib
-
-    # 复制文件到目标位置
-    sudo cp -f "$output_dir"/bin/* /nfsroot/usr/local/bin/
-    sudo cp -f "$output_dir"/include/*.h /nfsroot/usr/local/include/
-    sudo cp -f "$output_dir"/lib/*.a /nfsroot/usr/local/lib/
-
-    # 添加权限检查
-    if [ $? -ne 0 ]; then
-        color_echo "${RED}" "文件复制失败！请检查权限和目标路径"
-        exit 1
-    fi
-
-    color_echo "${GREEN}" "Middleware 文件已成功部署到 /nfsroot"
 }
 
 # 编译应用程序
@@ -189,46 +173,24 @@ build_applications() {
     local build_dir="$app_dir/build"
     local output_dir="$OUTPUT_DIR/applications"
     
-
-    # 2. 创建构建目录
+    # 创建构建目录
     mkdir -p "$build_dir"
     pushd "$build_dir" >/dev/null
 
-    # 3. 配置交叉编译环境
+    # 配置交叉编译环境
     cmake -DCMAKE_TOOLCHAIN_FILE="$PROJECT_ROOT/Middleware/toolchain.cmake" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_INSTALL_PREFIX="$output_dir" \
         -DMIDDLEWARE_DIR="$OUTPUT_DIR/middleware" \
         .. || error_exit "Applications CMake configuration failed"
 
-    # 4. 编译并安装
+    # 编译并安装
     make -j$(nproc) || error_exit "Applications build failed"
     make install || error_exit "Applications install failed"
 
     popd >/dev/null
 
     color_echo "${GREEN}" "Applications build completed."
-
-    sudo mkdir -p /nfsroot/app/body_control
-    sudo mkdir -p /nfsroot/app/brake_system
-    sudo mkdir -p /nfsroot/app/dashboard
-
-    # 6. 复制可执行文件和DBC文件
-    sudo cp "$output_dir/bin/body_control" /nfsroot/app/body_control/
-    sudo cp "$app_dir/body_control/BodyControl.dbc" /nfsroot/app/body_control/ 2>/dev/null || true
-
-    sudo cp "$output_dir/bin/powertrain" /nfsroot/app/brake_system/
-    sudo cp "$app_dir/brake_system/Powertrain.dbc" /nfsroot/app/brake_system/ 2>/dev/null || true
-
-    sudo cp "$output_dir/bin/dashboard" /nfsroot/app/dashboard/
-    sudo cp "$app_dir/dashboard/Dashboard.dbc" /nfsroot/app/dashboard/ 2>/dev/null || true
-
-    # 7. 设置执行权限
-    sudo chmod +x /nfsroot/app/body_control/body_control
-    sudo chmod +x /nfsroot/app/brake_system/powertrain
-    sudo chmod +x /nfsroot/app/dashboard/dashboard
-
-    color_echo "${GREEN}" "Applications deployed to /nfsroot/app"
 }
 
 # 生成交叉编译工具链文件
@@ -254,6 +216,86 @@ EOF
     color_echo "${GREEN}" "Toolchain file created: $toolchain_file"
 }
 
+# 部署到NFS根文件系统
+deploy_to_nfs() {
+    if [ -z "$NFS_PATH" ]; then
+        color_echo "${YELLOW}" "No NFS path specified, skipping NFS deployment."
+        return
+    fi
+
+    color_echo "${YELLOW}" "Deploying to NFS root filesystem at $NFS_PATH..."
+    
+    # 创建必要的运行时目录
+    for dir in dev proc sys run tmp; do
+        sudo mkdir -p "$NFS_PATH/$dir"
+        sudo chmod 777 "$NFS_PATH/$dir"
+    done
+    sudo rm -rf "$NFS_PATH/tmp/*" 2>/dev/null || true
+    
+    # 部署应用程序
+    local app_output_dir="$OUTPUT_DIR/applications"
+    sudo mkdir -p "$NFS_PATH/app/body_control"
+    sudo mkdir -p "$NFS_PATH/app/brake_system"
+    sudo mkdir -p "$NFS_PATH/app/dashboard"
+    
+    sudo cp "$app_output_dir/bin/body_control" "$NFS_PATH/app/body_control/" || true
+    sudo cp "$PROJECT_ROOT/app/body_control/BodyControl.dbc" "$NFS_PATH/app/body_control/" 2>/dev/null || true
+    
+    sudo cp "$app_output_dir/bin/powertrain" "$NFS_PATH/app/brake_system/" || true
+    sudo cp "$PROJECT_ROOT/app/brake_system/Powertrain.dbc" "$NFS_PATH/app/brake_system/" 2>/dev/null || true
+    
+    sudo cp "$app_output_dir/bin/dashboard" "$NFS_PATH/app/dashboard/" || true
+    sudo cp "$PROJECT_ROOT/app/dashboard/Dashboard.dbc" "$NFS_PATH/app/dashboard/" 2>/dev/null || true
+    
+    # 设置执行权限
+    sudo chmod +x "$NFS_PATH/app/body_control/body_control" 2>/dev/null || true
+    sudo chmod +x "$NFS_PATH/app/brake_system/powertrain" 2>/dev/null || true
+    sudo chmod +x "$NFS_PATH/app/dashboard/dashboard" 2>/dev/null || true
+    
+    # 部署中间件
+    local middleware_output_dir="$OUTPUT_DIR/middleware"
+    sudo mkdir -p "$NFS_PATH/usr/local/bin"
+    sudo mkdir -p "$NFS_PATH/usr/local/include"
+    sudo mkdir -p "$NFS_PATH/usr/local/lib"
+    
+    sudo cp -f "$middleware_output_dir/bin/"* "$NFS_PATH/usr/local/bin/" 2>/dev/null || true
+    sudo cp -f "$middleware_output_dir/include/"*.h "$NFS_PATH/usr/local/include/" 2>/dev/null || true
+    sudo cp -f "$middleware_output_dir/lib/"*.a "$NFS_PATH/usr/local/lib/" 2>/dev/null || true
+    
+    # 部署驱动
+    local driver_output_dir="$OUTPUT_DIR/drivers"
+    sudo mkdir -p "$NFS_PATH/lib/modules/$KERNEL_VERSION"
+    sudo cp -f "$driver_output_dir/"*.ko "$NFS_PATH/lib/modules/$KERNEL_VERSION/" 2>/dev/null || true
+    
+    color_echo "${GREEN}" "NFS deployment completed to $NFS_PATH"
+}
+
+# 部署到TFTP服务器
+deploy_to_tftp() {
+    if [ -z "$TFTP_PATH" ]; then
+        color_echo "${YELLOW}" "No TFTP path specified, skipping TFTP deployment."
+        return
+    fi
+
+    color_echo "${YELLOW}" "Deploying to TFTP server at $TFTP_PATH..."
+    
+    # 确保TFTP目录存在
+    sudo mkdir -p "$TFTP_PATH"
+    
+    # 部署U-Boot
+    local uboot_output_dir="$OUTPUT_DIR/uboot"
+    sudo cp -f "$uboot_output_dir/u-boot.bin" "$TFTP_PATH/" || true
+    
+    # 部署内核镜像
+    local kernel_output_dir="$OUTPUT_DIR/kernel"
+    sudo cp -f "$kernel_output_dir/zImage" "$TFTP_PATH/" || true
+    
+    # 部署设备树文件
+    sudo cp -f "$kernel_output_dir/"*.dtb "$TFTP_PATH/" 2>/dev/null || true
+    
+    color_echo "${GREEN}" "TFTP deployment completed to $TFTP_PATH"
+}
+
 # 显示构建报告
 show_report() {
     color_echo "${GREEN}" "\nBuild Report:"
@@ -264,6 +306,19 @@ show_report() {
     echo "Drivers:     $(ls $OUTPUT_DIR/drivers/*.ko 2>/dev/null | wc -l) modules"
     echo "Middleware:  $(ls $OUTPUT_DIR/middleware/bin/* 2>/dev/null | wc -l) executables"
     echo "Applications: $(find $OUTPUT_DIR/applications/bin -type f 2>/dev/null | wc -l) executables"
+    
+    if [ -n "$NFS_PATH" ]; then
+        color_echo "${YELLOW}" "\nNFS Deployment:"
+        echo "Path: $NFS_PATH"
+        echo "App dirs: $(ls -d $NFS_PATH/app/* 2>/dev/null | wc -l)"
+        echo "Middleware: $(ls $NFS_PATH/usr/local/bin/* 2>/dev/null | wc -l) executables"
+    fi
+    
+    if [ -n "$TFTP_PATH" ]; then
+        color_echo "${YELLOW}" "\nTFTP Deployment:"
+        echo "Path: $TFTP_PATH"
+        echo "Files: $(ls $TFTP_PATH/{u-boot.bin,zImage,*.dtb} 2>/dev/null | wc -l)"
+    fi
 }
 
 # 参数解析
@@ -276,26 +331,39 @@ parse_args() {
                 ;;
             -u|--uboot-only)
                 build_uboot
+                deploy_to_tftp
                 exit 0
                 ;;
             -k|--kernel-only)
                 build_kernel
                 build_drivers
+                deploy_to_tftp
                 exit 0
                 ;;
             -d|--drivers-only)
                 build_drivers
+                deploy_to_nfs
                 exit 0
                 ;;
             -m|--middleware-only)
                 generate_toolchain_file
                 build_middleware
+                deploy_to_nfs
                 exit 0
                 ;;
             -a|--app-only)
                 generate_toolchain_file
                 build_applications
+                deploy_to_nfs
                 exit 0
+                ;;
+            --nfs-path)
+                shift
+                NFS_PATH=$(realpath "$1")
+                ;;
+            --tftp-path)
+                shift
+                TFTP_PATH=$(realpath "$1")
                 ;;
             -h|--help)
                 show_help
@@ -313,11 +381,13 @@ show_help() {
     echo "Usage: $0 [options]"
     echo "Options:"
     echo "  -c, --clean           Clean build artifacts"
-    echo "  -u, --uboot-only      Build U-Boot only"
-    echo "  -k, --kernel-only     Build Kernel and modules"
-    echo "  -d, --drivers-only    Build external drivers only"
-    echo "  -m, --middleware-only Build Middleware application only"
-    echo "  -a, --app-only        Build applications only"
+    echo "  -u, --uboot-only      Build U-Boot only (also deploys to TFTP if specified)"
+    echo "  -k, --kernel-only     Build Kernel and modules (also deploys to TFTP if specified)"
+    echo "  -d, --drivers-only    Build external drivers only (also deploys to NFS if specified)"
+    echo "  -m, --middleware-only Build Middleware application only (also deploys to NFS if specified)"
+    echo "  -a, --app-only        Build applications only (also deploys to NFS if specified)"
+    echo "  --nfs-path PATH       Deploy root filesystem to NFS PATH"
+    echo "  --tftp-path PATH      Deploy boot files to TFTP PATH"
     echo "  -h, --help            Show this help"
 }
 
@@ -333,8 +403,8 @@ main() {
     mkdir -p "$PROJECT_ROOT/transport/include"
     mkdir -p "$PROJECT_ROOT/transport/driver_can"
 
-    ln -sf "$PROJECT_ROOT/kernel/linux-imx-rel_imx_4.1.15_2.1.0_ga_alientek/drivers/net/can/flexcan.h" "$PROJECT_ROOT/transport/include/flexcan.h"
-    ln -sf "$PROJECT_ROOT/kernel/linux-imx-rel_imx_4.1.15_2.1.0_ga_alientek/drivers/net/can" "$PROJECT_ROOT/transport/driver_can/"
+    ln -sf "$PROJECT_ROOT/kernel/linux-imx-rel_imx_4.1.15_2.1.0_ga_alientek/drivers/net/can/flexcan.h" "$PROJECT_ROOT/transport/include/flexcan.h" || true
+    ln -sf "$PROJECT_ROOT/kernel/linux-imx-rel_imx_4.1.15_2.1.0_ga_alientek/drivers/net/can" "$PROJECT_ROOT/transport/driver_can/" || true
 
     build_uboot
     build_kernel
@@ -346,6 +416,10 @@ main() {
     
     # 编译应用程序
     build_applications
+    
+    # 部署到目标路径
+    deploy_to_nfs
+    deploy_to_tftp
     
     show_report
 }
