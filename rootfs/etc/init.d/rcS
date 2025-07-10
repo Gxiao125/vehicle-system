@@ -42,9 +42,6 @@ sleep 2  # 等待 CAN 服务初始化
 # 启动车辆系统应用
 echo "Starting vehicle system applications..."
 
-# 启动车身控制系统
-/app/body_control/body_control > /var/log/body_control.log 2>&1 &
-
 # 启动动力系统
 /app/brake_system/powertrain > /var/log/powertrain.log 2>&1 &
 
