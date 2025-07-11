@@ -1,2 +1,0 @@
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-ar qc lib/libSharedMemory.a CMakeFiles/SharedMemory.dir/sharedMemory/SharedMemoryPool.cpp.o
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-ranlib lib/libSharedMemory.a

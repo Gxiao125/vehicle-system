@@ -1,2 +1,0 @@
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-ar qc lib/libCanMessageParser.a CMakeFiles/CanMessageParser.dir/masage_parse/CanMessageParser.cpp.o
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-ranlib lib/libCanMessageParser.a

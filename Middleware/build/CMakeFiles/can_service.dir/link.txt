@@ -1,1 +1,0 @@
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-g++ -O3 -DNDEBUG CMakeFiles/can_service.dir/server_main/can_service_main.cpp.o -o bin/can_service  lib/libCANService.a lib/libTransportLayer.a lib/libCanController.a lib/libSharedMemory.a -lrt -lpthread 

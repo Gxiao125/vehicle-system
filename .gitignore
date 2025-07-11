@@ -1,0 +1,126 @@
+# ======================
+# 核心原则：
+# 跟踪所有构建脚本和配置
+# 忽略构建生成的中间文件和输出
+# ======================
+
+# ======================
+# 构建输出目录
+# ======================
+/output/*
+
+# ======================
+# 编译生成文件 (忽略)
+# ======================
+# 对象文件
+*.o
+*.ko
+*.mod.c
+*.mod.o
+
+# 临时编译文件
+*.d
+*.cmd
+*.order
+*.symvers
+
+# CMake 生成文件
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+install_manifest.txt
+*.ninja
+*.ninja_deps
+
+# ======================
+# 应用构建目录 (保留结构但忽略内容)
+# ======================
+/app/build/*
+
+# ======================
+# 中间件构建目录 (保留结构但忽略内容)
+# ======================
+/Middleware/build/*
+
+# ======================
+# 内核构建产物 (忽略)
+# ======================
+/kernel/linux-imx-rel_imx_4.1.15_2.1.0_ga_alientek/vmlinux*
+/kernel/linux-imx-rel_imx_4.1.15_2.1.0_ga_alientek/System.map
+/kernel/linux-imx-rel_imx_4.1.15_2.1.0_ga_alientek/arch/arm/boot/compressed/vmlinux
+/kernel/linux-imx-rel_imx_4.1.15_2.1.0_ga_alientek/arch/arm/boot/Image
+/kernel/linux-imx-rel_imx_4.1.15_2.1.0_ga_alientek/.tmp_*
+
+# ======================
+# 日志文件
+# ======================
+*.log
+/output/logs/
+
+# ======================
+# 开发环境文件 (可选保留)
+# ======================
+# 取消注释以下行以保留IDE配置
+#.vscode/
+#.idea/
+
+# 测试文件
+test.txt
+can_.py
+
+# ======================
+# 系统/运行时文件
+# ======================
+# 根文件系统运行时文件
+/rootfs/dev/
+/rootfs/proc/
+/rootfs/sys/
+/rootfs/run/
+/rootfs/tmp/*
+
+# ======================
+# 临时文件
+# ======================
+*~
+*.swp
+*.bak
+*.tmp
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+
+# ======================
+# 符号链接 (不跟踪)
+# ======================
+/transport/include/flexcan.h
+/transport/driver_can/can
+
+# ======================
+# 例外规则 (必须跟踪的文件)
+# ======================
+# 构建脚本和配置
+!/.gitignore
+!/build.sh
+!/build/config.env
+
+# 内核配置
+!/kernel/linux-imx-rel_imx_4.1.15_2.1.0_ga_alientek/arch/arm/configs/imx_alientek_emmc_defconfig
+
+# 工具链配置
+!/build/toolchains/
+!/build/toolchains/.gitkeep
+
+# 确保构建目录结构存在
+!/app/build/.gitkeep
+!/Middleware/build/.gitkeep
+!/output/.gitkeep
+
+# 根文件系统目录结构
+!/rootfs/dev/.gitkeep
+!/rootfs/proc/.gitkeep
+!/rootfs/sys/.gitkeep
+!/rootfs/run/.gitkeep
+!/rootfs/tmp/.gitkeep

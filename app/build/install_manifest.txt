@@ -1,6 +1,0 @@
-/home/xiao/project/vehicle-system/output/applications/bin/body_control
-/home/xiao/project/vehicle-system/output/applications/body_control/BodyControl.dbc
-/home/xiao/project/vehicle-system/output/applications/bin/powertrain
-/home/xiao/project/vehicle-system/output/applications/brake_system/Powertrain.dbc
-/home/xiao/project/vehicle-system/output/applications/bin/dashboard
-/home/xiao/project/vehicle-system/output/applications/dashboard/Dashboard.dbc

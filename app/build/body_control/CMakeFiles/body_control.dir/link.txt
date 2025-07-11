@@ -1,1 +1,0 @@
-/home/xiao/project/vehicle-system/build/toolchains/gcc-linaro-4.9.4-2017.01-x86_64_arm-linux-gnueabihf/bin/arm-linux-gnueabihf-g++ -O3 -DNDEBUG CMakeFiles/body_control.dir/body_control.cpp.o -o body_control  /home/xiao/project/vehicle-system/output/middleware/lib/libVehicleCommunicationAPI.a -lrt 
